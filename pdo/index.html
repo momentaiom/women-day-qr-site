@@ -1,695 +1,726 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#612c90">
-<title>HAWA Booth Passport</title>
+<title>رحلة يوم المرأة العُمانية | PDO HAWA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-
-<script>
-/* =====================================================================
-   CONFIG — the only line you need to edit.
-   Paste your Google Apps Script Web App URL (ends with /exec).
-   Leave empty "" to run in demo mode (nothing is saved).
-   ===================================================================== */
-window.PASSPORT_CONFIG = {
-  ENDPOINT: "",
-  EVENT: "HAWA Women's Day 2026"
-};
-</script>
-
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: one centred passport card on the lilac/mint field; stamp row on top,
-   one booth per screen, sticky action bar at the bottom of the card. Single brand look. */
 :root{
-  --lilac:#bdaed6; --lilac-soft:#efe9f7; --lilac-deep:#9d86c6; --mint:#6dbd8c; --mint-soft:#e3f4ea;
-  --plum:#612c90; --ink:#2c1747; --muted:#6f6385; --paper:#ffffff; --line:#e4dcef;
-  --ok:#2f8a57; --ok-bg:#e3f4ea; --bad:#b3364a; --bad-bg:#fbe8ec;
-  --display:"Reem Kufi","IBM Plex Sans","Segoe UI",system-ui,sans-serif;
-  --body:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,Arial,sans-serif;
-  --radius:22px;
-  color-scheme:light;
+  --lilac:#bdaed6; --lilac-deep:#9d86c6; --mint:#6dbd8c; --plum:#612c90;
+  --ink:#2c1747; --paper:#ffffff; --muted:#6f6385; --ribbon:#4fae78;
+  --error:#d9385a; --error-bg:#fdf2f4; --success:#2e8555; --success-bg:#edf9f2;
+  --display:"Reem Kufi","IBM Plex Sans Arabic",Tahoma,sans-serif;
+  --body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif;
 }
 *{box-sizing:border-box}
 html,body{min-height:100%;margin:0}
 body{
-  font-family:var(--body); font-size:16px; line-height:1.5; color:var(--ink);
-  background:var(--lilac);
-  background-image:radial-gradient(ellipse 70% 55% at 50% 45%, var(--mint) 0%, #8cb6a6 35%, #a9b0c9 65%, var(--lilac) 100%);
+  font-family:var(--body); color:var(--ink); background:var(--lilac);
+  background-image:radial-gradient(ellipse 60% 62% at 50% 50%, var(--mint) 0%, #8cb6a6 38%, #a9b0c9 66%, var(--lilac) 100%);
   background-attachment:fixed;
-  -webkit-text-size-adjust:100%;
 }
-.bg-frame{position:fixed; inset:0; z-index:0; pointer-events:none; background:url("../assets/frame.webp") center/cover no-repeat; opacity:.55}
-.wrap{
-  position:relative; z-index:1; min-height:100vh; min-height:100dvh;
-  display:flex; flex-direction:column; align-items:center; gap:14px;
-  padding-block:calc(env(safe-area-inset-top,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 24px);
-  padding-left:max(16px, env(safe-area-inset-left,0px));
-  padding-right:max(16px, env(safe-area-inset-right,0px));
+.stage{
+  position:relative; min-height:100vh; display:grid; place-items:center; overflow-x:hidden; isolation:isolate;
+  padding-block:32px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
 }
-.brand{width:min(260px,62vw)}
-.brand img{display:block; width:100%; height:auto}
+.frame{position:fixed; inset:0; z-index:-1; pointer-events:none; background:url("../assets/frame.webp") center/100% 100% no-repeat; opacity:.95}
+.logos{position:absolute; top:calc(env(safe-area-inset-top,0px) + 18px); right:max(20px, env(safe-area-inset-right,0px)); width:clamp(140px,20vw,260px); z-index:2}
+.logos img{display:block; width:100%; height:auto}
 
 .card{
-  width:100%; max-width:520px; background:var(--paper); border-radius:var(--radius);
-  box-shadow:0 0 0 6px var(--plum), 0 0 0 10px var(--lilac), 0 24px 60px rgba(50,20,90,.32);
-  overflow:hidden; display:flex; flex-direction:column;
+  width:100%; max-width:560px; background:var(--paper); border-radius:28px;
+  padding:clamp(24px,4.5vw,38px) clamp(20px,4vw,36px); text-align:center;
+  box-shadow:0 0 0 8px var(--plum), 0 0 0 13px var(--lilac), 0 24px 60px rgba(50,20,90,.35);
+  display:flex; flex-direction:column; align-items:center; gap:14px; margin-top:68px; margin-bottom:24px;
+  position:relative; transition:all .3s ease;
 }
 
-/* Passport header: stamps + progress */
-.passport{background:var(--lilac-soft); padding:16px 18px 14px; border-bottom:1px dashed var(--lilac-deep); display:flex; flex-direction:column; gap:12px}
-.passport[hidden]{display:none}
-.pp-top{display:flex; justify-content:space-between; align-items:baseline; gap:12px}
-.pp-label{font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--plum)}
-.pp-step{font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums}
-.stamps{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(5,1fr); gap:6px}
-.stamp{display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0}
-.stamp .dot{
-  width:42px; height:42px; border-radius:50%; display:grid; place-items:center;
-  border:2px dashed var(--lilac-deep); color:var(--lilac-deep); background:var(--paper);
-  font-family:var(--display); font-size:15px; transition:transform .35s cubic-bezier(.2,1.6,.4,1), background .2s, border-color .2s;
+/* Top Bar inside Card */
+.card-top{
+  width:100%; display:flex; justify-content:space-between; align-items:center; gap:8px;
 }
-.stamp .name{font-size:10.5px; font-weight:600; color:var(--muted); text-align:center; line-height:1.15; overflow-wrap:anywhere}
-.stamp.current .dot{border-style:solid; border-color:var(--plum); color:var(--plum)}
-.stamp.done .dot{background:var(--plum); border:2px solid var(--plum); color:var(--paper); transform:rotate(-12deg)}
-.stamp.done .name{color:var(--plum)}
-.bar{height:6px; background:var(--paper); border-radius:999px; overflow:hidden}
-.bar span{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--lilac-deep),var(--mint)); border-radius:999px; transition:width .4s ease}
-
-/* Screens */
-.screens{position:relative}
-.screen{padding:24px 22px 8px; display:flex; flex-direction:column; gap:16px; animation:enter .35s ease both}
-.screen[hidden]{display:none}
-@keyframes enter{from{opacity:0; transform:translateX(18px)}to{opacity:1; transform:none}}
-.screen.back{animation-name:enterBack}
-@keyframes enterBack{from{opacity:0; transform:translateX(-18px)}to{opacity:1; transform:none}}
-
-.eyebrow{display:inline-flex; align-self:flex-start; align-items:center; gap:8px; font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--plum); background:var(--lilac-soft); padding:5px 12px; border-radius:999px}
-h1,h2{font-family:var(--display); color:var(--plum); margin:0; line-height:1.2; text-wrap:balance}
-h1{font-size:clamp(28px,7vw,36px)}
-h2{font-size:clamp(20px,5.2vw,24px)}
-.lead{margin:0; color:var(--muted)}
-.hero-lily{width:84px; align-self:center; filter:drop-shadow(0 6px 12px rgba(70,40,110,.18))}
-
-.field{display:flex; flex-direction:column; gap:6px}
-label, .legend{font-weight:600; font-size:15px}
-input[type=text], textarea, select{
-  width:100%; font:inherit; font-size:16px; color:var(--ink); background:var(--paper);
-  border:1.5px solid var(--line); border-radius:14px; padding:13px 14px; transition:border-color .15s, box-shadow .15s;
+.lang-btn{
+  background:#efe9f7; color:var(--plum); border:1.5px solid var(--lilac-deep);
+  padding:5px 12px; border-radius:999px; font-family:var(--body); font-size:12.5px;
+  font-weight:600; cursor:pointer; transition:.2s;
 }
-textarea{min-height:140px; resize:vertical}
-select{appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--plum) 50%),linear-gradient(135deg,var(--plum) 50%,transparent 50%); background-position:calc(100% - 20px) 55%,calc(100% - 14px) 55%; background-size:6px 6px; background-repeat:no-repeat; padding-right:40px}
-input:focus, textarea:focus, select:focus{outline:none; border-color:var(--plum); box-shadow:0 0 0 4px rgba(97,44,144,.15)}
-.invalid{border-color:var(--bad) !important}
-.hint{font-size:13px; color:var(--muted); display:flex; justify-content:space-between; gap:8px}
-.err{font-size:13px; color:var(--bad); min-height:1.2em; margin:0}
+.lang-btn:hover{background:var(--plum); color:#fff}
 
-/* Multiple choice */
-.options{display:flex; flex-direction:column; gap:10px; margin:0; padding:0; border:0}
-.opt{
-  position:relative; display:flex; gap:12px; align-items:flex-start; padding:14px; border:1.5px solid var(--line);
-  border-radius:16px; cursor:pointer; background:var(--paper); transition:border-color .15s, background .15s;
+.bloom{width:84px; height:84px; position:relative; margin-top:-6px}
+.bloom img{width:100%; height:100%; object-fit:contain; animation:grow 3.2s ease-in-out infinite}
+.badge{font-size:13px; font-weight:600; letter-spacing:.02em; color:var(--plum); background:#efe9f7; padding:5px 14px; border-radius:999px}
+
+h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(24px,4.2vw,34px); color:var(--plum); line-height:1.3; text-wrap:balance}
+.subtitle{margin:0; color:var(--muted); font-size:clamp(14px,2vw,16px); line-height:1.65; max-width:44ch}
+
+/* Progress Bar */
+.progress-wrap{width:100%; max-width:340px; display:flex; flex-direction:column; gap:6px; align-items:center}
+.bar{width:100%; height:10px; background:#efe9f7; border-radius:999px; overflow:hidden}
+.bar span{display:block; height:100%; width:14%; border-radius:999px; background:linear-gradient(90deg,var(--lilac-deep),var(--mint)); transition:width .4s cubic-bezier(.4,0,.2,1)}
+.step-counter{font-size:12px; color:var(--muted); font-weight:600}
+
+/* Step Container */
+.step-view{width:100%; display:none; flex-direction:column; gap:14px; text-align:start; animation:fadeIn .35s ease}
+.step-view.active{display:flex}
+
+@keyframes fadeIn{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:translateY(0)}}
+
+/* Form Controls */
+.field-group{display:flex; flex-direction:column; gap:6px; width:100%}
+.field-label{font-size:14px; font-weight:600; color:var(--plum)}
+.input-box, .textarea-box, .select-box{
+  width:100%; padding:13px 15px; border-radius:14px; border:2px solid #e2d9f3;
+  font-family:var(--body); font-size:15px; color:var(--ink); background:#fbf9ff;
+  transition:border-color .2s, box-shadow .2s; outline:none;
 }
-.opt input{position:absolute; opacity:0; pointer-events:none}
-.opt .key{flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-weight:600; font-size:14px; background:var(--lilac-soft); color:var(--plum)}
-.opt .txt{flex:1; min-width:0; padding-top:4px}
-.opt:hover{border-color:var(--lilac-deep)}
-.opt:has(input:checked){border-color:var(--plum); background:#f8f5fc}
-.opt:has(input:checked) .key{background:var(--plum); color:var(--paper)}
-.opt:has(input:focus-visible){box-shadow:0 0 0 4px rgba(97,44,144,.2)}
-.options.locked .opt{cursor:default}
-.opt.correct{border-color:var(--ok) !important; background:var(--ok-bg) !important}
-.opt.correct .key{background:var(--ok) !important; color:#fff !important}
-.opt.wrong{border-color:var(--bad) !important; background:var(--bad-bg) !important}
-.opt.wrong .key{background:var(--bad) !important; color:#fff !important}
+.input-box:focus, .textarea-box:focus, .select-box:focus{
+  border-color:var(--plum); background:#fff; box-shadow:0 0 0 4px rgba(97,44,144,.12);
+}
+.textarea-box{min-height:110px; resize:vertical; line-height:1.6}
 
-.feedback{display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:14px; font-size:15px; animation:enter .3s ease both}
-.feedback[hidden]{display:none}
-.feedback.ok{background:var(--ok-bg); color:var(--ok)}
-.feedback.bad{background:var(--bad-bg); color:var(--bad)}
-.feedback b{display:block}
+/* Question Box */
+.q-box{
+  background:#f8f5fc; border:1.5px solid #e7dff5; border-radius:18px; padding:16px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.q-en{font-size:15.5px; font-weight:700; color:var(--ink); line-height:1.5; direction:ltr; text-align:left}
+.q-ar{font-size:14.5px; font-weight:500; color:var(--muted); line-height:1.65; direction:rtl; text-align:right; border-top:1px dashed #dcd0f0; padding-top:8px}
 
-/* Prize */
-.prize-box{display:flex; gap:14px; align-items:center; padding:14px; border-radius:16px; background:var(--mint-soft)}
-.prize-box[hidden]{display:none}
-.wheel{flex:none; width:48px; height:48px; border-radius:50%; background:conic-gradient(var(--plum) 0 60deg,var(--mint) 60deg 120deg,var(--lilac-deep) 120deg 180deg,var(--plum) 180deg 240deg,var(--mint) 240deg 300deg,var(--lilac-deep) 300deg); box-shadow:inset 0 0 0 4px #fff}
-.prize-box .cat{font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--ok); font-weight:600}
-.prize-box .pname{font-weight:600}
+/* Multiple Choice Options */
+.options-list{display:flex; flex-direction:column; gap:10px; width:100%}
+.option-btn{
+  width:100%; text-align:left; direction:ltr; padding:13px 16px; border-radius:14px;
+  border:2px solid #e2d9f3; background:#fff; color:var(--ink); font-family:var(--body);
+  font-size:14.5px; font-weight:500; line-height:1.45; cursor:pointer;
+  display:flex; align-items:flex-start; gap:10px; transition:all .2s ease;
+}
+html[dir="rtl"] .option-btn.rtl-opt{direction:rtl; text-align:right}
+.option-btn:hover{border-color:var(--lilac-deep); background:#faf7ff}
+.option-btn.selected{border-color:var(--plum); background:#f3ecfc; font-weight:600}
+.option-btn.correct{border-color:var(--success); background:var(--success-bg); color:#1b5233; font-weight:600}
+.option-btn.wrong{border-color:var(--error); background:var(--error-bg); color:#8c1d35}
+.opt-letter{
+  min-width:26px; height:26px; border-radius:50%; background:#efe9f7; color:var(--plum);
+  display:inline-grid; place-items:center; font-weight:700; font-size:13px; flex-shrink:0;
+}
+.option-btn.correct .opt-letter{background:var(--success); color:#fff}
+.option-btn.wrong .opt-letter{background:var(--error); color:#fff}
 
-/* Review list */
-.review{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; font-size:14px}
-.review li{display:flex; justify-content:space-between; gap:12px; padding-bottom:8px; border-bottom:1px solid var(--line)}
-.review li span:last-child{font-weight:600; text-align:right; min-width:0; overflow-wrap:anywhere}
+/* Feedback Alert */
+.feedback{
+  display:none; padding:12px 15px; border-radius:14px; font-size:13.5px; line-height:1.6; font-weight:500;
+}
+.feedback.show{display:block; animation:fadeIn .25s ease}
+.feedback.ok{background:var(--success-bg); color:#1c5636; border:1.5px solid #a3e0be}
+.feedback.err{background:var(--error-bg); color:#961f38; border:1.5px solid #f3b5c1}
 
-/* Actions */
-.actions{position:sticky; bottom:0; display:flex; gap:10px; padding:14px 22px calc(18px + env(safe-area-inset-bottom,0px)); background:linear-gradient(to top,var(--paper) 75%,rgba(255,255,255,0))}
-.actions[hidden]{display:none}
-.btn{appearance:none; border:0; font:inherit; font-weight:600; font-size:16px; border-radius:999px; padding:14px 22px; cursor:pointer; transition:transform .1s, background .15s, opacity .15s; min-height:52px}
-.btn:active{transform:scale(.98)}
-.btn:focus-visible{outline:3px solid var(--mint); outline-offset:3px}
-.btn-primary{flex:1; background:var(--plum); color:#fff}
-.btn-primary:disabled{opacity:.55; cursor:not-allowed}
-.btn-ghost{background:var(--lilac-soft); color:var(--plum)}
-.btn-ghost[hidden]{display:none}
-.spinner{display:inline-block; width:18px; height:18px; border:3px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spin .8s linear infinite; vertical-align:-3px; margin-right:8px}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* Navigation Buttons */
+.nav-row{display:flex; gap:10px; width:100%; margin-top:4px}
+.btn-primary{
+  flex:1; padding:14px 20px; border:none; border-radius:999px;
+  background:linear-gradient(135deg, var(--plum), #7c3cb5); color:#fff;
+  font-family:var(--body); font-size:16px; font-weight:700; cursor:pointer;
+  box-shadow:0 8px 20px rgba(97,44,144,.28); transition:transform .15s, opacity .2s;
+}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary:disabled{opacity:.5; cursor:not-allowed; transform:none}
+.btn-secondary{
+  padding:14px 18px; border:2px solid #e2d9f3; border-radius:999px;
+  background:#fff; color:var(--plum); font-family:var(--body); font-size:14.5px;
+  font-weight:600; cursor:pointer; transition:.2s;
+}
+.btn-secondary:hover{background:#f5f0fc}
 
-/* Success */
-.success{text-align:center; align-items:center; padding-bottom:28px}
-.seal{width:96px; height:96px; border-radius:50%; display:grid; place-items:center; background:var(--plum); color:#fff; box-shadow:0 0 0 8px var(--lilac-soft); animation:pop .6s cubic-bezier(.2,1.6,.4,1) both}
-@keyframes pop{from{transform:scale(.3) rotate(-30deg); opacity:0}to{transform:none; opacity:1}}
-.ref{font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums}
-.demo-note{font-size:12px; color:var(--bad); background:var(--bad-bg); padding:6px 10px; border-radius:10px}
-.demo-note[hidden]{display:none}
+/* Final Receipt / Verification Card */
+.pass-card{
+  background:linear-gradient(180deg, #f4fbf7 0%, #ffffff 100%);
+  border:2px solid var(--mint); border-radius:20px; padding:20px 18px;
+  text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.pass-icon{
+  width:56px; height:56px; border-radius:50%; background:var(--mint); color:#fff;
+  display:grid; place-items:center; font-size:28px; font-weight:700;
+  box-shadow:0 6px 16px rgba(79,174,120,.35);
+}
+.pass-details{
+  width:100%; background:#f8f5fc; border-radius:14px; padding:12px 14px;
+  display:flex; flex-direction:column; gap:8px; font-size:14px; text-align:start;
+}
+.pass-row{display:flex; justify-content:space-between; gap:8px; border-bottom:1px dashed #e2d9f3; padding-bottom:6px}
+.pass-row:last-child{border-bottom:none; padding-bottom:0}
+.pass-label{color:var(--muted); font-weight:500}
+.pass-val{color:var(--plum); font-weight:700}
 
-.foot{font-family:var(--display); color:#fff; font-size:18px; text-shadow:0 2px 8px rgba(60,30,100,.35)}
+.ribbon{
+  margin-top:6px; font-family:var(--display); font-weight:600; font-size:clamp(16px,2.2vw,20px);
+  color:var(--ribbon); padding:.2em 1.3em .3em; border-radius:999px;
+  box-shadow:0 0 0 4px var(--plum); cursor:pointer; user-select:none;
+}
 
-.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
-@media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important}}
+/* Admin Modal */
+.admin-modal{
+  position:fixed; inset:0; background:rgba(30,12,54,.65); z-index:99;
+  display:none; place-items:center; padding:16px;
+}
+.admin-modal.open{display:grid}
+.admin-box{
+  background:#fff; width:100%; max-width:440px; border-radius:22px; padding:24px;
+  box-shadow:0 20px 50px rgba(0,0,0,.35); text-align:center; display:flex; flex-direction:column; gap:12px;
+}
+
+@keyframes grow{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.07) rotate(4deg)}}
+@media (prefers-reduced-motion:reduce){.bloom img{animation:none}}
+@media (max-width:640px){
+  .frame{background-size:cover; opacity:.6}
+  .logos{right:auto; left:50%; translate:-50% 0}
+}
 </style>
 </head>
 <body>
-<div class="bg-frame" aria-hidden="true"></div>
+<main class="stage">
+  <div class="frame" aria-hidden="true"></div>
+  <div class="logos"><img src="../assets/logos.webp" alt="لِعُمان For Oman"></div>
 
-<div class="wrap">
-  <div class="brand"><img src="../assets/logos.webp" alt="For Oman"></div>
-
-  <main class="card" aria-live="polite">
-    <!-- Passport stamps (hidden on welcome + success) -->
-    <header class="passport" id="passport" hidden>
-      <div class="pp-top">
-        <span class="pp-label" id="ppLabel">Booth passport</span>
-        <span class="pp-step" id="ppStep">Step 1 of 6</span>
-      </div>
-      <ol class="stamps" id="stamps" aria-label="Booths visited"></ol>
-      <div class="bar" aria-hidden="true"><span id="barFill"></span></div>
-    </header>
-
-    <div class="screens" id="screens">
-      <!-- STEP 1: Identification -->
-      <section class="screen" data-screen="welcome" id="s-welcome">
-        <img class="hero-lily" src="../assets/lily-b.webp" alt="" aria-hidden="true">
-        <span class="eyebrow">Digital passport</span>
-        <h1>Welcome to HAWA</h1>
-        <p class="lead">Visit each booth, answer one question at every stop, then record the prize you won on the wheel.</p>
-        <div class="field">
-          <label for="fullName">Full Name</label>
-          <input id="fullName" type="text" autocomplete="name" autocapitalize="words" maxlength="80" placeholder="e.g. Aisha Al Balushi">
-          <p class="err" id="fullNameErr"></p>
-        </div>
-        <div class="field">
-          <label for="employeeId">Employee ID</label>
-          <input id="employeeId" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="20" placeholder="e.g. 123456">
-          <p class="err" id="employeeIdErr"></p>
-        </div>
-      </section>
-
-      <!-- STEPS 2: questions are rendered here by JS -->
-      <div id="questionMount"></div>
-
-      <!-- STEP 3: Prize -->
-      <section class="screen" data-screen="prize" id="s-prize" hidden>
-        <span class="eyebrow">Spin the Wheel</span>
-        <h2>Which prize did you win?</h2>
-        <p class="lead">Spin the wheel at the prize desk, then pick the exact prize below.</p>
-        <div class="field">
-          <label for="prize">Your prize</label>
-          <select id="prize">
-            <option value="" selected disabled>Select your prize…</option>
-          </select>
-          <p class="err" id="prizeErr"></p>
-        </div>
-        <div class="prize-box" id="prizeBox" hidden>
-          <div class="wheel" aria-hidden="true"></div>
-          <div><div class="cat" id="prizeCat"></div><div class="pname" id="prizeName"></div></div>
-        </div>
-        <ul class="review" id="review" aria-label="Your details"></ul>
-        <p class="err" id="submitErr" role="alert"></p>
-      </section>
-
-      <!-- STEP 4: Success -->
-      <section class="screen success" data-screen="done" id="s-done" hidden>
-        <div class="seal" aria-hidden="true">
-          <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
-        </div>
-        <h1>Thank you!</h1>
-        <p class="lead">Your participation and prize have been recorded.</p>
-        <p class="ref" id="refLine"></p>
-        <p class="demo-note" id="demoNote" hidden>Demo mode: no endpoint is set, so this entry was not saved.</p>
-      </section>
+  <section class="card">
+    <div class="card-top">
+      <span class="badge" id="boothBadge">PDO – HAWA Event</span>
+      <button type="button" class="lang-btn" id="langToggle" onclick="toggleLanguage()">English / عربي</button>
     </div>
 
-    <footer class="actions" id="actions">
-      <button class="btn btn-ghost" id="backBtn" type="button" hidden>Back</button>
-      <button class="btn btn-primary" id="nextBtn" type="button">Start</button>
-    </footer>
-  </main>
+    <div class="bloom"><img src="../assets/lily-b.webp" alt="" aria-hidden="true"></div>
 
-  <p class="foot">Together we thrive</p>
+    <h1 id="mainTitle">رحلة يوم المرأة العُمانية</h1>
+    <p class="subtitle" id="mainSubtitle">أبقِ هذه الصفحة مفتوحة طوال جولتك في الأركان للإجابة على الأسئلة وتوثيق جائزتك.</p>
+
+    <div class="progress-wrap">
+      <div class="bar" aria-hidden="true"><span id="progressBar"></span></div>
+      <span class="step-counter" id="stepCounter">الخطوة 1 من 7</span>
+    </div>
+
+    <!-- STEP 1: Identification -->
+    <div class="step-view active" id="step-1">
+      <div class="field-group">
+        <label class="field-label" for="fullName" data-ar="الاسم الكامل (Full Name) *" data-en="Full Name *">الاسم الكامل (Full Name) *</label>
+        <input type="text" id="fullName" class="input-box" placeholder="أدخل اسمك الكامل / Enter your full name" autocomplete="name">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="empId" data-ar="الرقم الوظيفي / البطاقة (Staff ID) *" data-en="Employee / Staff ID *">الرقم الوظيفي / البطاقة (Staff ID) *</label>
+        <input type="text" id="empId" class="input-box" placeholder="مثال: 12345 / e.g. 12345">
+      </div>
+      <div class="feedback err" id="err-1">يرجى إدخال الاسم الكامل والرقم الوظيفي للمتابعة. / Please enter both your Name and ID.</div>
+      <div class="nav-row">
+        <button type="button" class="btn-primary" onclick="nextFromLogin()" data-ar="ابدأ الرحلة ←" data-en="Start Journey →">ابدأ الرحلة ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Booth 1 - Empower -->
+    <div class="step-view" id="step-2">
+      <div class="q-box">
+        <div class="q-en"><strong>Empower Booth:</strong> If you could introduce one new initiative to further empower women at PDO what would it be?</div>
+        <div class="q-ar"><strong>ركن التمكين (Empower):</strong> لو كان بإمكانك تقديم مبادرة جديدة لتمكين المرأة في شركة تنمية نفط عُمان (PDO)، فما هي؟</div>
+      </div>
+      <div class="field-group">
+        <textarea id="ansEmpower" class="textarea-box" placeholder="اكتبي إجابتك أو مقترحك هنا... / Write your initiative idea here..."></textarea>
+      </div>
+      <div class="feedback err" id="err-2">يرجى كتابة إجابتك قبل الانتقال للمرحلة التالية. / Please write your answer before proceeding.</div>
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" onclick="goToStep(1)" data-ar="السابق" data-en="Back">السابق</button>
+        <button type="button" class="btn-primary" onclick="nextFromOpen(2, 'ansEmpower')" data-ar="التالي ←" data-en="Next →">التالي ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Booth 2 - Inspire -->
+    <div class="step-view" id="step-3">
+      <div class="q-box">
+        <div class="q-en"><strong>Inspire Booth:</strong> Why is early intervention important for children with disabilities?</div>
+        <div class="q-ar"><strong>ركن الإلهام (Inspire):</strong> لماذا يُعد التدخل المبكر مهماً للأطفال ذوي الإعاقة؟</div>
+      </div>
+      <div class="options-list" id="opts-3">
+        <button type="button" class="option-btn" onclick="checkMCQ(3, 'A', this)">
+          <span class="opt-letter">A</span>
+          <span>It supports children's development, builds essential skills, and helps them reach their full potential.</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(3, 'B', this)">
+          <span class="opt-letter">B</span>
+          <span>It is only needed when children start school.</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(3, 'C', this)">
+          <span class="opt-letter">C</span>
+          <span>It focuses only on a child's difficulties rather than their abilities.</span>
+        </button>
+      </div>
+      <div class="feedback" id="fb-3"></div>
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" onclick="goToStep(2)" data-ar="السابق" data-en="Back">السابق</button>
+        <button type="button" class="btn-primary" id="next-3" onclick="goToStep(4)" disabled data-ar="التالي ←" data-en="Next →">التالي ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Booth 3 - HAWA Logo -->
+    <div class="step-view" id="step-4">
+      <div class="q-box">
+        <div class="q-en"><strong>HAWA Logo Booth:</strong> What does HAWA help women at PDO do?</div>
+        <div class="q-ar"><strong>ركن شعار حواء (HAWA Logo):</strong> ما الذي تساعد به شبكة «حواء» النساء في شركة تنمية نفط عُمان؟</div>
+      </div>
+      <div class="options-list" id="opts-4">
+        <button type="button" class="option-btn" onclick="checkMCQ(4, 'A', this)">
+          <span class="opt-letter">A</span>
+          <span>Connect and support one another</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(4, 'B', this)">
+          <span class="opt-letter">B</span>
+          <span>Build confidence and leadership skills</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(4, 'C', this)">
+          <span class="opt-letter">C</span>
+          <span>Access development and wellbeing opportunities</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(4, 'D', this)">
+          <span class="opt-letter">D</span>
+          <span>All of the above / جميع ما ذكر أعلاه</span>
+        </button>
+      </div>
+      <div class="feedback" id="fb-4"></div>
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" onclick="goToStep(3)" data-ar="السابق" data-en="Back">السابق</button>
+        <button type="button" class="btn-primary" id="next-4" onclick="goToStep(5)" disabled data-ar="التالي ←" data-en="Next →">التالي ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Booth 4 - Care (Clinic) -->
+    <div class="step-view" id="step-5">
+      <div class="q-box">
+        <div class="q-en"><strong>Care (Clinic) Booth:</strong> Which health condition is often called the “silent killer” because it may have no noticeable symptoms?</div>
+        <div class="q-ar"><strong>ركن الرعاية والعيادة (Care):</strong> أي حالة صحية تُسمى غالباً «القاتل الصامت» لأنها قد لا تُظهر أعراضاً ملحوظة؟</div>
+      </div>
+      <div class="options-list" id="opts-5">
+        <button type="button" class="option-btn" onclick="checkMCQ(5, 'A', this)">
+          <span class="opt-letter">A</span>
+          <span>High blood pressure (ارتفاع ضغط الدم)</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(5, 'B', this)">
+          <span class="opt-letter">B</span>
+          <span>Seasonal allergies (الحساسية الموسمية)</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(5, 'C', this)">
+          <span class="opt-letter">C</span>
+          <span>Common cold (نزلات البرد)</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(5, 'D', this)">
+          <span class="opt-letter">D</span>
+          <span>Acid reflux (ارتجاع المريء)</span>
+        </button>
+      </div>
+      <div class="feedback" id="fb-5"></div>
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" onclick="goToStep(4)" data-ar="السابق" data-en="Back">السابق</button>
+        <button type="button" class="btn-primary" id="next-5" onclick="goToStep(6)" disabled data-ar="التالي ←" data-en="Next →">التالي ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 6: Overall Experience -->
+    <div class="step-view" id="step-6">
+      <div class="q-box">
+        <div class="q-en"><strong>Overall Experience:</strong> What inspired you most about Hawa this year, which activity did you enjoy most, and what would you love to see from Hawa next year?</div>
+        <div class="q-ar"><strong>التجربة العامة:</strong> ما أكثر ما ألهمك في فعالية «حواء» هذا العام، وما النشاط الذي استمتعتِ به أكثر، وماذا تودين رؤيته العام القادم؟</div>
+      </div>
+      <div class="field-group">
+        <textarea id="ansOverall" class="textarea-box" placeholder="شاركي انطباعك وتطلعاتك هنا... / Share your feedback and thoughts here..."></textarea>
+      </div>
+      <div class="feedback err" id="err-6">يرجى مشاركة رأيك قبل الانتقال إلى مرحلة عجلة الحظ. / Please share your feedback before moving to Spin the Wheel.</div>
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" onclick="goToStep(5)" data-ar="السابق" data-en="Back">السابق</button>
+        <button type="button" class="btn-primary" onclick="nextFromOpen(6, 'ansOverall')" data-ar="التوجه لعجلة الحظ ←" data-en="Go to Spin the Wheel →">التوجه لعجلة الحظ ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 7: Spin the Wheel Prize Selection -->
+    <div class="step-view" id="step-7">
+      <div class="q-box">
+        <div class="q-en"><strong>Spin the Wheel:</strong> Please spin the wheel at the prize booth, then select the voucher/prize you won from the list below:</div>
+        <div class="q-ar"><strong>عجلة الحظ (Spin the Wheel):</strong> توجهي الآن لتدوير عجلة الحظ، ثم اختاري القسيمة/الجائزة التي ربحتِها من القائمة أدناه لتأكيد الاستلام:</div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="prizeSelect" data-ar="اختاري الجائزة (Select Your Prize) *" data-en="Select Your Prize Voucher *">اختاري الجائزة (Select Your Prize) *</label>
+        <select id="prizeSelect" class="select-box" dir="ltr">
+          <option value="">-- Choose Prize / اختاري القسيمة --</option>
+          <optgroup label="Beauty / Salon (التجميل والسبا)">
+            <option value="Beauty / Salon - Mermaid Center">Mermaid Center</option>
+            <option value="Beauty / Salon - Bahar Home Nail">Bahar Home Nail</option>
+            <option value="Beauty / Salon - Lebanon Flower Salon">Lebanon Flower Salon</option>
+            <option value="Beauty / Salon - Asia Spa">Asia Spa</option>
+            <option value="Beauty / Salon - Lime Spa">Lime Spa</option>
+            <option value="Beauty / Salon - Eithz Spa">Eithz Spa</option>
+            <option value="Beauty / Salon - Talha Salon for Fitness & Beauty">Talha Salon for Fitness & Beauty</option>
+            <option value="Beauty / Salon - Longevity">Longevity</option>
+            <option value="Beauty / Salon - Optimum Clinic">Optimum Clinic</option>
+          </optgroup>
+          <optgroup label="Restaurant / Café (المطاعم والمقاهي)">
+            <option value="Restaurant / Café - Laduree">Laduree</option>
+            <option value="Restaurant / Café - Silica Cafe">Silica Cafe</option>
+          </optgroup>
+          <optgroup label="Hotel (الفنادق)">
+            <option value="Hotel - Grand Hyatt Muscat">Grand Hyatt Muscat</option>
+          </optgroup>
+          <optgroup label="Hospital (المستشفيات والعيادات)">
+            <option value="Hospital - Badr Al Samaa Royal Hospital">Badr Al Samaa Royal Hospital</option>
+            <option value="Hospital - Burjeel Hospital Muscat">Burjeel Hospital Muscat</option>
+          </optgroup>
+          <optgroup label="Fitness (اللياقة البدنية)">
+            <option value="Fitness - One O One Gym">One O One Gym</option>
+            <option value="Fitness - Azer gym">Azer gym</option>
+          </optgroup>
+          <optgroup label="Flowers / Workshops (الزهور والديكور)">
+            <option value="Flowers / Workshops - Floward Business">Floward Business</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="feedback err" id="err-7">يرجى اختيار الجائزة التي حصلتِ عليها من القائمة. / Please select the prize you won from the list.</div>
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" onclick="goToStep(6)" data-ar="السابق" data-en="Back">السابق</button>
+        <button type="button" class="btn-primary" id="submitBtn" onclick="submitSurvey()" data-ar="تأكيد وإرسال ✓" data-en="Submit & Verify ✓">تأكيد وإرسال ✓</button>
+      </div>
+    </div>
+
+    <!-- STEP 8: Completed / Verification Screen -->
+    <div class="step-view" id="step-8">
+      <div class="pass-card">
+        <div class="pass-icon">✓</div>
+        <h2 style="margin:0; color:var(--plum); font-size:21px" data-ar="تم توثيق مشاركتك بنجاح!" data-en="Participation Verified!">تم توثيق مشاركتك بنجاح!</h2>
+        <p style="margin:0; font-size:13.5px; color:var(--muted)" data-ar="أبرزي هذه الشاشة لمنظمي ركن عجلة الحظ لاستلام جائزتك." data-en="Show this screen at the Spin the Wheel desk to claim your voucher.">أبرزي هذه الشاشة لمنظمي ركن عجلة الحظ لاستلام جائزتك.</p>
+        <div class="pass-details">
+          <div class="pass-row">
+            <span class="pass-label" data-ar="الاسم:" data-en="Name:">الاسم:</span>
+            <span class="pass-val" id="summaryName">-</span>
+          </div>
+          <div class="pass-row">
+            <span class="pass-label" data-ar="الرقم الوظيفي:" data-en="Staff ID:">الرقم الوظيفي:</span>
+            <span class="pass-val" id="summaryId">-</span>
+          </div>
+          <div class="pass-row">
+            <span class="pass-label" data-ar="الجائزة:" data-en="Prize Won:">الجائزة:</span>
+            <span class="pass-val" id="summaryPrize" dir="ltr">-</span>
+          </div>
+          <div class="pass-row">
+            <span class="pass-label" data-ar="وقت التوثيق:" data-en="Timestamp:">وقت التوثيق:</span>
+            <span class="pass-val" id="summaryTime" dir="ltr">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="ribbon" id="ribbonTrigger" onclick="handleRibbonTap()">بها يزدهر الوطن</p>
+  </section>
+</main>
+
+<!-- Hidden Admin Modal (5 taps on Ribbon) -->
+<div class="admin-modal" id="adminModal">
+  <div class="admin-box">
+    <h3 style="margin:0; color:var(--plum)">لوحة المنظمين | Admin Panel</h3>
+    <p style="font-size:13.5px; color:var(--muted); margin:0">عدد السجلات المحفوظة على هذا الجهاز: <strong id="localCount">0</strong></p>
+    <button type="button" class="btn-primary" onclick="exportToExcelCSV()">تحميل ملف Excel (CSV)</button>
+    <button type="button" class="btn-secondary" onclick="resetCurrentVisitor()">بدء زائر جديد (Reset Device)</button>
+    <button type="button" class="btn-secondary" onclick="closeAdmin()">إغلاق</button>
+  </div>
 </div>
 
 <script>
-(function () {
-  "use strict";
+/**
+ * ضع رابط Google Apps Script Web App هنا لحفظ جميع المشاركات من هواتف الزوار في ملف Excel/Google Sheet مركزي تلقائياً
+ */
+const GOOGLE_SCRIPT_URL = ""; 
 
-  /* ------------------------------------------------------------------
-     CONTENT — booths, questions and prizes
-     ------------------------------------------------------------------ */
-  var QUESTIONS = [
-    { id: "empower", booth: "Empower", short: "E", type: "text",
-      q: "If you could introduce one new initiative to further empower women at PDO, what would it be?",
-      min: 10 },
-    { id: "inspire", booth: "Inspire", short: "I", type: "mcq",
-      q: "Why is early intervention important for children with disabilities?",
-      options: [
-        "It supports children's development, builds essential skills, and helps them reach their full potential",
-        "It is only needed when children start school",
-        "It focuses only on a child's difficulties"
-      ], correct: 0 },
-    { id: "hawa", booth: "HAWA", short: "H", type: "mcq",
-      q: "What does HAWA help women at PDO do?",
-      options: [
-        "Connect and support one another",
-        "Build confidence and leadership skills",
-        "Access development and wellbeing opportunities",
-        "All of the above"
-      ], correct: 3 },
-    { id: "care", booth: "Care Clinic", short: "C", type: "mcq",
-      q: "Which health condition is often called the “silent killer” because it may have no noticeable symptoms?",
-      options: ["High blood pressure", "Seasonal allergies", "Common cold", "Acid reflux"],
-      correct: 0 },
-    { id: "experience", booth: "Experience", short: "★", type: "text",
-      q: "What inspired you most about HAWA this year, which activity did you enjoy most, and what would you love to see from HAWA next year?",
-      min: 10 }
-  ];
+let currentLang = "ar";
+let currentStep = 1;
+const totalSteps = 7;
 
-  var PRIZES = [
-    { cat: "Beauty / Salon", items: ["Mermaid Center", "Bahar Home Nail", "Lebanon Flower Salon", "Asia Spa", "Lime Spa", "Eithz Spa", "Talha Salon", "Longevity", "Optimum Clinic"] },
-    { cat: "Restaurant / Café", items: ["Laduree", "Silica Cafe"] },
-    { cat: "Hotel", items: ["Grand Hyatt Muscat"] },
-    { cat: "Hospital", items: ["Badr Al Samaa Royal Hospital", "Burjeel Hospital Muscat"] },
-    { cat: "Fitness", items: ["One O One Gym", "Azer Gym"] },
-    { cat: "Flowers", items: ["Floward Business"] }
-  ];
+const state = {
+  fullName: "",
+  empId: "",
+  ansEmpower: "",
+  ansInspire: "",
+  ansHawa: "",
+  ansCare: "",
+  ansOverall: "",
+  prize: "",
+  timestamp: ""
+};
 
-  var CFG = window.PASSPORT_CONFIG || {};
-  var STORE_KEY = "hawa-passport-v1";
-  var OUTBOX_KEY = "hawa-passport-outbox";
-  var LETTERS = "ABCDEFGH";
+const stepMeta = {
+  1: { badge: "Step 1: Registration | التسجيل", arTitle: "مرحباً بكِ في فعالية حواء", enTitle: "Welcome to PDO HAWA Event" },
+  2: { badge: "Booth 1: Empower | ركن التمكين", arTitle: "ركن التمكين (Empower)", enTitle: "Empower Booth" },
+  3: { badge: "Booth 2: Inspire | ركن الإلهام", arTitle: "ركن الإلهام (Inspire)", enTitle: "Inspire Booth" },
+  4: { badge: "Booth 3: HAWA Logo | شعار حواء", arTitle: "ركن شعار حواء (HAWA)", enTitle: "HAWA Logo Booth" },
+  5: { badge: "Booth 4: Care Clinic | ركن الرعاية", arTitle: "ركن العيادة (Care)", enTitle: "Care (Clinic) Booth" },
+  6: { badge: "Overall Experience | التجربة العامة", arTitle: "انطباعك العام", enTitle: "Overall Experience" },
+  7: { badge: "Spin the Wheel | عجلة الحظ", arTitle: "توثيق جائزة عجلة الحظ", enTitle: "Spin the Wheel Prize" },
+  8: { badge: "Completed | مكتمل ✓", arTitle: "شكراً لمشاركتكِ!", enTitle: "Thank You for Participating!" }
+};
 
-  /* ------------------------------------------------------------------
-     STATE
-     ------------------------------------------------------------------ */
-  // steps: 0 = welcome, 1..5 = questions, 6 = prize, 7 = done
-  var state = {
-    step: 0,
-    fullName: "", employeeId: "",
-    answers: {},          // id -> text or option index
-    checked: {},          // mcq id -> true once checked (locked)
-    prize: "", prizeCategory: "",
-    submissionId: uid(),
-    startedAt: new Date().toISOString()
-  };
-
-  /* ------------------------------------------------------------------
-     DOM HELPERS
-     ------------------------------------------------------------------ */
-  var $ = function (id) { return document.getElementById(id); };
-  function el(tag, attrs, html) {
-    var n = document.createElement(tag);
-    if (attrs) for (var k in attrs) n.setAttribute(k, attrs[k]);
-    if (html != null) n.innerHTML = html;
-    return n;
+const correctAnswers = {
+  3: {
+    ans: "A",
+    okAr: "إجابة صحيحة! ✅ يسلط هذا السؤال الضوء على رسالة جمعية التدخل المبكر (AEICD) وأهمية التدخل المبكر في مساعدة الأطفال على النمو والتعلم والازدهار.",
+    okEn: "Correct! ✅ This question highlights AEICD’s mission and the importance of early intervention in helping children develop, learn, and thrive.",
+    errAr: "إجابة غير صحيحة، حاولي مرة أخرى لاجتياز ركن الإلهام.",
+    errEn: "Incorrect answer. Please try again to verify this booth."
+  },
+  4: {
+    ans: "D",
+    okAr: "إجابة صحيحة! ✅ شبكة حواء تدعم المرأة في جميع هذه الجوانب.",
+    okEn: "Correct! ✅ HAWA supports women at PDO across all of these pillars.",
+    errAr: "إجابة غير مكتملة، حاولي مرة أخرى!",
+    errEn: "Not quite right, please try again!"
+  },
+  5: {
+    ans: "A",
+    okAr: "إجابة صحيحة! ✅ ارتفاع ضغط الدم يُعرف بالقاتل الصامت لعدم وجود أعراض واضحة غالباً.",
+    okEn: "Correct! ✅ High blood pressure is known as the 'silent killer'.",
+    errAr: "إجابة غير صحيحة، حاولي مرة أخرى!",
+    errEn: "Incorrect answer, please try again!"
   }
-  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-  function uid() {
-    try { return crypto.randomUUID(); } catch (e) {
-      return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
-    }
-  }
-  function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
-  function load() {
-    try { var s = JSON.parse(localStorage.getItem(STORE_KEY)); if (s && s.submissionId) state = Object.assign(state, s); } catch (e) {}
-  }
-  function clearDraft() { try { localStorage.removeItem(STORE_KEY); } catch (e) {} }
+};
 
-  /* ------------------------------------------------------------------
-     BUILD QUESTION SCREENS + STAMPS + PRIZE LIST
-     ------------------------------------------------------------------ */
-  var mount = $("questionMount");
-  QUESTIONS.forEach(function (q, i) {
-    var s = el("section", { "class": "screen", "data-screen": "q", id: "s-" + q.id, hidden: "" });
-    var head = '<span class="eyebrow">Booth ' + (i + 1) + " · " + esc(q.booth) + "</span>" +
-               '<h2 id="h-' + q.id + '">' + esc(q.q) + "</h2>";
-    if (q.type === "text") {
-      s.innerHTML = head +
-        '<div class="field">' +
-          '<label class="sr-only" for="t-' + q.id + '">Your answer</label>' +
-          '<textarea id="t-' + q.id + '" maxlength="1000" placeholder="Type your answer here…" aria-describedby="c-' + q.id + '"></textarea>' +
-          '<div class="hint"><span>At least ' + q.min + ' characters</span><span id="c-' + q.id + '">0 / 1000</span></div>' +
-          '<p class="err" id="e-' + q.id + '"></p>' +
-        "</div>";
-    } else {
-      var opts = q.options.map(function (o, k) {
-        return '<label class="opt" data-k="' + k + '">' +
-                 '<input type="radio" name="r-' + q.id + '" value="' + k + '">' +
-                 '<span class="key">' + LETTERS[k] + "</span>" +
-                 '<span class="txt">' + esc(o) + "</span>" +
-               "</label>";
-      }).join("");
-      s.innerHTML = head +
-        '<fieldset class="options" id="o-' + q.id + '" aria-labelledby="h-' + q.id + '">' + opts + "</fieldset>" +
-        '<div class="feedback" id="f-' + q.id + '" role="status" hidden></div>' +
-        '<p class="err" id="e-' + q.id + '"></p>';
-    }
-    mount.appendChild(s);
-  });
-
-  var stamps = $("stamps");
-  QUESTIONS.forEach(function (q, i) {
-    var li = el("li", { "class": "stamp", id: "st-" + i });
-    li.innerHTML = '<span class="dot" aria-hidden="true">' + esc(q.short) + '</span><span class="name">' + esc(q.booth) + "</span>";
-    stamps.appendChild(li);
-  });
-
-  var sel = $("prize");
-  PRIZES.forEach(function (g) {
-    var og = el("optgroup", { label: g.cat });
-    g.items.forEach(function (name) {
-      var o = el("option", { value: name, "data-cat": g.cat }); o.textContent = name; og.appendChild(o);
-    });
-    sel.appendChild(og);
-  });
-
-  /* ------------------------------------------------------------------
-     NAVIGATION
-     ------------------------------------------------------------------ */
-  var screens = ["s-welcome"].concat(QUESTIONS.map(function (q) { return "s-" + q.id; }), ["s-prize", "s-done"]);
-  var TOTAL_STEPS = QUESTIONS.length + 1; // 5 booths + prize
-
-  function show(step, backwards) {
-    state.step = step;
-    screens.forEach(function (id, i) {
-      var s = $(id); s.hidden = i !== step;
-      if (i === step) { s.classList.toggle("back", !!backwards); }
-    });
-    renderChrome();
-    save();
-    var s = $(screens[step]);
-    var focusable = s.querySelector("textarea, input:not([type=radio]), select");
-    if (focusable && step !== 0) setTimeout(function () { focusable.focus({ preventScroll: true }); }, 50);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  function renderChrome() {
-    var st = state.step;
-    var inPassport = st >= 1 && st <= QUESTIONS.length + 1;
-    $("passport").hidden = !inPassport;
-    $("actions").hidden = st === screens.length - 1;
-    $("backBtn").hidden = st === 0 || st === screens.length - 1;
-
-    if (inPassport) {
-      var n = st; // 1..6
-      $("ppStep").textContent = "Step " + n + " of " + TOTAL_STEPS;
-      $("ppLabel").textContent = st <= QUESTIONS.length ? "Booth passport" : "Prize desk";
-      $("barFill").style.width = Math.round(((n - 1) / TOTAL_STEPS) * 100) + "%";
-      QUESTIONS.forEach(function (q, i) {
-        var li = $("st-" + i);
-        li.classList.toggle("done", isAnswered(i));
-        li.classList.toggle("current", st === i + 1);
-      });
-    }
-    updatePrimary();
-  }
-
-  function isAnswered(i) {
-    var q = QUESTIONS[i];
-    if (q.type === "text") return (state.answers[q.id] || "").trim().length >= q.min && state.step > i + 1;
-    return !!state.checked[q.id];
-  }
-
-  function updatePrimary() {
-    var btn = $("nextBtn"), st = state.step;
-    btn.disabled = false;
-    if (st === 0) { btn.textContent = "Start"; return; }
-    if (st <= QUESTIONS.length) {
-      var q = QUESTIONS[st - 1];
-      if (q.type === "mcq" && !state.checked[q.id]) {
-        btn.textContent = "Check answer";
-        btn.disabled = state.answers[q.id] == null;
-      } else {
-        btn.textContent = st === QUESTIONS.length ? "Go to prize" : "Next booth";
-      }
-      return;
-    }
-    if (st === QUESTIONS.length + 1) { btn.textContent = "Submit"; }
-  }
-
-  /* ------------------------------------------------------------------
-     VALIDATION
-     ------------------------------------------------------------------ */
-  function setErr(inputId, errId, msg) {
-    var i = $(inputId), e = $(errId);
-    if (i) i.classList.toggle("invalid", !!msg);
-    if (e) e.textContent = msg || "";
-    return !msg;
-  }
-
-  function validateWelcome() {
-    var name = $("fullName").value.trim().replace(/\s+/g, " ");
-    var id = $("employeeId").value.trim().toUpperCase();
-    var ok1 = setErr("fullName", "fullNameErr",
-      name.length < 3 ? "Please enter your full name." :
-      name.split(" ").length < 2 ? "Please enter your first and last name." : "");
-    var ok2 = setErr("employeeId", "employeeIdErr",
-      !id ? "Please enter your Employee ID." :
-      !/^[A-Z0-9-]{3,20}$/.test(id) ? "Use 3–20 letters or numbers only." : "");
-    if (ok1 && ok2) { state.fullName = name; state.employeeId = id; }
-    else { (ok1 ? $("employeeId") : $("fullName")).focus(); }
-    return ok1 && ok2;
-  }
-
-  function validateText(q) {
-    var v = $("t-" + q.id).value.trim();
-    state.answers[q.id] = v;
-    var ok = setErr("t-" + q.id, "e-" + q.id, v.length < q.min ? "Please write a little more (at least " + q.min + " characters)." : "");
-    if (!ok) $("t-" + q.id).focus();
-    return ok;
-  }
-
-  function checkMcq(q) {
-    var pick = state.answers[q.id];
-    if (pick == null) { $("e-" + q.id).textContent = "Please choose an answer."; return; }
-    $("e-" + q.id).textContent = "";
-    state.checked[q.id] = true;
-    paintMcq(q);
-    save();
-    renderChrome();
-  }
-
-  function paintMcq(q) {
-    var box = $("o-" + q.id), fb = $("f-" + q.id);
-    var pick = state.answers[q.id];
-    box.querySelectorAll("input").forEach(function (r) { r.checked = String(pick) === r.value; });
-    if (!state.checked[q.id]) return;
-    box.classList.add("locked");
-    box.querySelectorAll("input").forEach(function (r) { r.disabled = true; });
-    box.querySelectorAll(".opt").forEach(function (o) {
-      var k = +o.getAttribute("data-k");
-      o.classList.toggle("correct", k === q.correct);
-      o.classList.toggle("wrong", k === pick && k !== q.correct);
-    });
-    var right = pick === q.correct;
-    fb.className = "feedback " + (right ? "ok" : "bad");
-    fb.innerHTML = right
-      ? "<span>✔</span><div><b>Correct!</b>Booth stamped. Well done.</div>"
-      : "<span>✖</span><div><b>Not quite.</b>The correct answer is " + LETTERS[q.correct] + ". Your booth is still stamped.</div>";
-    fb.hidden = false;
-  }
-
-  function validatePrize() {
-    var opt = sel.options[sel.selectedIndex];
-    var ok = setErr("prize", "prizeErr", !sel.value ? "Please select the prize you won." : "");
-    if (ok) { state.prize = sel.value; state.prizeCategory = opt.getAttribute("data-cat") || ""; }
-    return ok;
-  }
-
-  /* ------------------------------------------------------------------
-     EVENTS
-     ------------------------------------------------------------------ */
-  $("nextBtn").addEventListener("click", function () {
-    var st = state.step;
-    if (st === 0) { if (validateWelcome()) show(1); return; }
-    if (st <= QUESTIONS.length) {
-      var q = QUESTIONS[st - 1];
-      if (q.type === "text") { if (validateText(q)) show(st + 1); }
-      else if (!state.checked[q.id]) { checkMcq(q); }
-      else { show(st + 1); }
-      if (st + 1 === QUESTIONS.length + 1) renderReview();
-      return;
-    }
-    if (st === QUESTIONS.length + 1) { if (validatePrize()) submit(); }
-  });
-
-  $("backBtn").addEventListener("click", function () {
-    if (state.step > 0) {
-      var st = state.step;
-      if (st <= QUESTIONS.length) {
-        var q = QUESTIONS[st - 1];
-        if (q.type === "text") state.answers[q.id] = $("t-" + q.id).value.trim();
-      }
-      show(st - 1, true);
-    }
-  });
-
-  QUESTIONS.forEach(function (q) {
-    if (q.type === "text") {
-      var t = $("t-" + q.id), c = $("c-" + q.id);
-      t.addEventListener("input", function () {
-        c.textContent = t.value.length + " / 1000";
-        state.answers[q.id] = t.value;
-        if (t.value.trim().length >= q.min) setErr("t-" + q.id, "e-" + q.id, "");
-        save();
-      });
-    } else {
-      $("o-" + q.id).addEventListener("change", function (ev) {
-        if (state.checked[q.id]) return;
-        state.answers[q.id] = +ev.target.value;
-        $("e-" + q.id).textContent = "";
-        save();
-        updatePrimary();
-      });
-    }
-  });
-
-  ["fullName", "employeeId"].forEach(function (id) {
-    $(id).addEventListener("input", function () { setErr(id, id + "Err", ""); });
-    $(id).addEventListener("keydown", function (e) { if (e.key === "Enter") $("nextBtn").click(); });
-  });
-
-  sel.addEventListener("change", function () {
-    validatePrize();
-    var opt = sel.options[sel.selectedIndex];
-    $("prizeCat").textContent = opt.getAttribute("data-cat") || "";
-    $("prizeName").textContent = sel.value;
-    $("prizeBox").hidden = !sel.value;
-    save();
-  });
-
-  /* ------------------------------------------------------------------
-     REVIEW + SUBMIT
-     ------------------------------------------------------------------ */
-  function score() {
-    return QUESTIONS.filter(function (q) { return q.type === "mcq" && state.answers[q.id] === q.correct; }).length;
-  }
-  function mcqTotal() { return QUESTIONS.filter(function (q) { return q.type === "mcq"; }).length; }
-
-  function renderReview() {
-    $("review").innerHTML =
-      "<li><span>Name</span><span>" + esc(state.fullName) + "</span></li>" +
-      "<li><span>Employee ID</span><span>" + esc(state.employeeId) + "</span></li>" +
-      "<li><span>Booths stamped</span><span>" + QUESTIONS.length + " / " + QUESTIONS.length + "</span></li>" +
-      "<li><span>Quiz score</span><span>" + score() + " / " + mcqTotal() + "</span></li>";
-  }
-
-  function buildPayload() {
-    var p = {
-      submissionId: state.submissionId,
-      event: CFG.EVENT || "",
-      submittedAt: new Date().toISOString(),
-      startedAt: state.startedAt,
-      fullName: state.fullName,
-      employeeId: state.employeeId,
-      prize: state.prize,
-      prizeCategory: state.prizeCategory,
-      score: score() + "/" + mcqTotal(),
-      device: navigator.userAgent.slice(0, 180)
-    };
-    QUESTIONS.forEach(function (q, i) {
-      var n = "q" + (i + 1) + "_" + q.id;
-      if (q.type === "text") p[n] = (state.answers[q.id] || "").trim();
-      else {
-        var k = state.answers[q.id];
-        p[n] = k == null ? "" : LETTERS[k] + ") " + q.options[k];
-        p[n + "_correct"] = k === q.correct ? "Yes" : "No";
-      }
-    });
-    return p;
-  }
-
-  function send(payload) {
-    if (!CFG.ENDPOINT) return new Promise(function (r) { setTimeout(function () { r({ ok: true, demo: true }); }, 700); });
-    var body = JSON.stringify(payload);
-    // Plain-text body = "simple" request, so the browser skips the CORS preflight Apps Script can't answer.
-    return fetch(CFG.ENDPOINT, { method: "POST", body: body, headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow" })
-      .then(function (res) { return res.json(); })
-      .then(function (j) { if (!j || !j.ok) throw new Error((j && j.error) || "Server error"); return j; })
-      .catch(function (err) {
-        if (err && /Server error|Duplicate|Invalid/.test(err.message)) throw err;
-        // Some corporate browsers block reading the redirect; fire-and-forget fallback.
-        // The server ignores repeats of the same submissionId, so this is safe.
-        return fetch(CFG.ENDPOINT, { method: "POST", body: body, mode: "no-cors" }).then(function () { return { ok: true, unverified: true }; });
-      });
-  }
-
-  function queue(payload) {
+// Restore saved progress on page load
+window.addEventListener("DOMContentLoaded", () => {
+  const saved = localStorage.getItem("pdo_hawa_current_state");
+  if (saved) {
     try {
-      var box = JSON.parse(localStorage.getItem(OUTBOX_KEY) || "[]");
-      if (!box.some(function (p) { return p.submissionId === payload.submissionId; })) box.push(payload);
-      localStorage.setItem(OUTBOX_KEY, JSON.stringify(box));
+      const parsed = JSON.parse(saved);
+      Object.assign(state, parsed.state || {});
+      document.getElementById("fullName").value = state.fullName || "";
+      document.getElementById("empId").value = state.empId || "";
+      document.getElementById("ansEmpower").value = state.ansEmpower || "";
+      document.getElementById("ansOverall").value = state.ansOverall || "";
+      document.getElementById("prizeSelect").value = state.prize || "";
+      if (parsed.step && parsed.step >= 1 && parsed.step <= 8) {
+        if (parsed.step === 8) renderSummary();
+        goToStep(parsed.step);
+      }
     } catch (e) {}
   }
-  function flushOutbox() {
-    if (!CFG.ENDPOINT) return;
-    var box; try { box = JSON.parse(localStorage.getItem(OUTBOX_KEY) || "[]"); } catch (e) { return; }
-    if (!box.length) return;
-    var p = box[0];
-    send(p).then(function () {
-      box.shift(); try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(box)); } catch (e) {}
-      flushOutbox();
-    }).catch(function () {});
+  updateUI();
+});
+
+function saveProgress() {
+  localStorage.setItem("pdo_hawa_current_state", JSON.stringify({
+    step: currentStep,
+    state: state
+  }));
+}
+
+function goToStep(step) {
+  document.querySelectorAll(".step-view").forEach(el => el.classList.remove("active"));
+  const target = document.getElementById("step-" + step);
+  if (target) target.classList.add("active");
+  currentStep = step;
+  updateUI();
+  saveProgress();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function updateUI() {
+  const meta = stepMeta[currentStep] || stepMeta[1];
+  document.getElementById("boothBadge").textContent = meta.badge;
+  document.getElementById("mainTitle").textContent = currentLang === "ar" ? meta.arTitle : meta.enTitle;
+
+  const pct = currentStep > totalSteps ? 100 : Math.round((currentStep / totalSteps) * 100);
+  document.getElementById("progressBar").style.width = pct + "%";
+
+  const counterEl = document.getElementById("stepCounter");
+  if (currentStep <= totalSteps) {
+    counterEl.textContent = currentLang === "ar"
+      ? `الخطوة ${currentStep} من ${totalSteps}`
+      : `Step ${currentStep} of ${totalSteps}`;
+  } else {
+    counterEl.textContent = currentLang === "ar" ? "اكتملت جميع المراحل (100%)" : "All Steps Completed (100%)";
   }
 
-  function submit() {
-    var btn = $("nextBtn"), back = $("backBtn");
-    btn.disabled = true; back.disabled = true;
-    btn.innerHTML = '<span class="spinner" aria-hidden="true"></span>Submitting…';
-    $("submitErr").textContent = "";
-    var payload = buildPayload();
-    send(payload).then(function (res) {
-      try { localStorage.setItem("hawa-passport-done", JSON.stringify({ id: state.employeeId, ref: state.submissionId })); } catch (e) {}
-      clearDraft();
-      $("refLine").textContent = "Reference: " + state.submissionId.slice(0, 8).toUpperCase();
-      $("demoNote").hidden = !res.demo;
-      show(screens.length - 1);
-    }).catch(function () {
-      queue(payload);
-      btn.disabled = false; back.disabled = false;
-      btn.textContent = "Try again";
-      $("submitErr").textContent = "We couldn't reach the server. Check your connection and tap Try again. Your answers are kept on this phone.";
-    });
-  }
-
-  /* ------------------------------------------------------------------
-     INIT — restore a draft if the page was refreshed mid-way
-     ------------------------------------------------------------------ */
-  load();
-  $("fullName").value = state.fullName || "";
-  $("employeeId").value = state.employeeId || "";
-  QUESTIONS.forEach(function (q) {
-    if (q.type === "text") {
-      var t = $("t-" + q.id); t.value = state.answers[q.id] || ""; $("c-" + q.id).textContent = t.value.length + " / 1000";
-    } else paintMcq(q);
+  document.querySelectorAll("[data-ar]").forEach(el => {
+    el.textContent = currentLang === "ar" ? el.getAttribute("data-ar") : el.getAttribute("data-en");
   });
-  if (state.prize) { sel.value = state.prize; sel.dispatchEvent(new Event("change")); }
-  if (state.step >= QUESTIONS.length + 1) renderReview();
-  show(Math.min(state.step || 0, QUESTIONS.length + 1));
-  flushOutbox();
-  window.addEventListener("online", flushOutbox);
-})();
+}
+
+function toggleLanguage() {
+  currentLang = currentLang === "ar" ? "en" : "ar";
+  const root = document.getElementById("htmlRoot");
+  root.setAttribute("lang", currentLang);
+  root.setAttribute("dir", currentLang === "ar" ? "rtl" : "ltr");
+  document.getElementById("mainSubtitle").textContent = currentLang === "ar"
+    ? "أبقِ هذه الصفحة مفتوحة طوال جولتك في الأركان للإجابة على الأسئلة وتوثيق جائزتك."
+    : "Keep this page open throughout your booth tour to answer the quiz and claim your prize.";
+  updateUI();
+}
+
+function nextFromLogin() {
+  const name = document.getElementById("fullName").value.trim();
+  const id = document.getElementById("empId").value.trim();
+  const err = document.getElementById("err-1");
+  if (!name || !id) {
+    err.classList.add("show");
+    return;
+  }
+  err.classList.remove("show");
+  state.fullName = name;
+  state.empId = id;
+  goToStep(2);
+}
+
+function nextFromOpen(stepNum, textareaId) {
+  const val = document.getElementById(textareaId).value.trim();
+  const err = document.getElementById("err-" + stepNum);
+  if (!val) {
+    err.classList.add("show");
+    return;
+  }
+  err.classList.remove("show");
+  if (stepNum === 2) state.ansEmpower = val;
+  if (stepNum === 6) state.ansOverall = val;
+  goToStep(stepNum + 1);
+}
+
+function checkMCQ(stepNum, chosenLetter, btnEl) {
+  const container = document.getElementById("opts-" + stepNum);
+  const fb = document.getElementById("fb-" + stepNum);
+  const nextBtn = document.getElementById("next-" + stepNum);
+  const rule = correctAnswers[stepNum];
+
+  container.querySelectorAll(".option-btn").forEach(b => {
+    b.classList.remove("selected", "correct", "wrong");
+  });
+
+  if (chosenLetter === rule.ans) {
+    btnEl.classList.add("correct");
+    fb.className = "feedback show ok";
+    fb.textContent = currentLang === "ar" ? rule.okAr : rule.okEn;
+    nextBtn.disabled = false;
+    if (stepNum === 3) state.ansInspire = chosenLetter;
+    if (stepNum === 4) state.ansHawa = chosenLetter;
+    if (stepNum === 5) state.ansCare = chosenLetter;
+    saveProgress();
+  } else {
+    btnEl.classList.add("wrong");
+    fb.className = "feedback show err";
+    fb.textContent = currentLang === "ar" ? rule.errAr : rule.errEn;
+    nextBtn.disabled = true;
+  }
+}
+
+async function submitSurvey() {
+  const prize = document.getElementById("prizeSelect").value;
+  const err = document.getElementById("err-7");
+  if (!prize) {
+    err.classList.add("show");
+    return;
+  }
+  err.classList.remove("show");
+
+  const submitBtn = document.getElementById("submitBtn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = currentLang === "ar" ? "جاري الحفظ..." : "Saving...";
+
+  state.prize = prize;
+  state.timestamp = new Date().toLocaleString("en-GB");
+
+  // 1. Save to Local Archive on device
+  const archive = JSON.parse(localStorage.getItem("pdo_hawa_submissions_archive") || "[]");
+  archive.push({ ...state });
+  localStorage.setItem("pdo_hawa_submissions_archive", JSON.stringify(archive));
+
+  // 2. Send to Google Sheets / Cloud Excel if URL is configured
+  if (GOOGLE_SCRIPT_URL) {
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(state)
+      });
+    } catch (e) {
+      console.warn("Cloud sync warning:", e);
+    }
+  }
+
+  renderSummary();
+  goToStep(8);
+}
+
+function renderSummary() {
+  document.getElementById("summaryName").textContent = state.fullName;
+  document.getElementById("summaryId").textContent = state.empId;
+  document.getElementById("summaryPrize").textContent = state.prize;
+  document.getElementById("summaryTime").textContent = state.timestamp;
+}
+
+// Admin Panel Logic (Tap Ribbon 5 times)
+let tapCount = 0;
+let tapTimer = null;
+function handleRibbonTap() {
+  tapCount++;
+  clearTimeout(tapTimer);
+  if (tapCount >= 5) {
+    tapCount = 0;
+    const archive = JSON.parse(localStorage.getItem("pdo_hawa_submissions_archive") || "[]");
+    document.getElementById("localCount").textContent = archive.length;
+    document.getElementById("adminModal").classList.add("open");
+  } else {
+    tapTimer = setTimeout(() => { tapCount = 0; }, 1200);
+  }
+}
+
+function closeAdmin() {
+  document.getElementById("adminModal").classList.remove("open");
+}
+
+function resetCurrentVisitor() {
+  localStorage.removeItem("pdo_hawa_current_state");
+  window.location.reload();
+}
+
+function exportToExcelCSV() {
+  const archive = JSON.parse(localStorage.getItem("pdo_hawa_submissions_archive") || "[]");
+  if (!archive.length) {
+    alert("لا توجد سجلات محفوظة حالياً.");
+    return;
+  }
+  const headers = [
+    "Timestamp",
+    "Full Name",
+    "Employee ID",
+    "Empower Initiative",
+    "Inspire Answer",
+    "HAWA Logo Answer",
+    "Care Clinic Answer",
+    "Overall Experience",
+    "Prize Voucher"
+  ];
+  const rows = archive.map(r => [
+    r.timestamp,
+    r.fullName,
+    r.empId,
+    r.ansEmpower,
+    r.ansInspire,
+    r.ansHawa,
+    r.ansCare,
+    r.ansOverall,
+    r.prize
+  ].map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(","));
+
+  const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `PDO_HAWA_Submissions_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 </script>
 </body>
 </html>
