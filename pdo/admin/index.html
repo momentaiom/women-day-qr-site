@@ -17,7 +17,23 @@
    ===================================================================== */
 window.ADMIN_CONFIG = {
   ENDPOINT: "https://script.google.com/macros/s/AKfycbyPV7c0DYmWn_dWTqwZ7-vaP-q5HDjp5DBwjxFkIEqTb6z3RJ61iNUN-EaZlzPldF5M/exec",
-  REFRESH_SECONDS: 30
+  REFRESH_SECONDS: 30,
+  // Vouchers available per business (from the vouchers list). Edit if numbers change.
+  STOCK: {
+    "Mermaid Center": 100, "Bahar Home Nail": 100, "Lebanon Flower Salon": 100, "Asia Spa": 100, "Lime Spa": 100,
+    "Eithz Spa": 100, "Talha Salon for Fitness & Beauty": 200, "Longevity": 500, "Optimum Clinic": 500,
+    "Laduree": 300, "Silica Cafe": 100, "Grand Hyatt Muscat": 500,
+    "Badr Al Samaa Royal Hospital": 900, "Burjeel Hospital Muscat": 100,
+    "One O One Gym": 200, "Azer Gym": 200, "Floward Business": 200
+  },
+  CATEGORIES: [
+    ["Beauty / Salon", ["Mermaid Center", "Bahar Home Nail", "Lebanon Flower Salon", "Asia Spa", "Lime Spa", "Eithz Spa", "Talha Salon for Fitness & Beauty", "Longevity", "Optimum Clinic"]],
+    ["Restaurant / Caf\u00E9", ["Laduree", "Silica Cafe"]],
+    ["Hotel", ["Grand Hyatt Muscat"]],
+    ["Hospital", ["Badr Al Samaa Royal Hospital", "Burjeel Hospital Muscat"]],
+    ["Fitness", ["One O One Gym", "Azer Gym"]],
+    ["Flowers / Workshops", ["Floward Business"]]
+  ]
 };
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -84,12 +100,20 @@ input:focus,select:focus{outline:none;border-color:var(--plum);box-shadow:0 0 0 
 .kpi.warn .v{color:var(--warn)}
 
 /* Panels */
-.panels{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
-@media (max-width:820px){.panels{grid-template-columns:1fr}}
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;align-items:start}
 .panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
 .panel h3{margin:0 0 12px;font-size:13px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
 .bars{display:flex;flex-direction:column;gap:7px;max-height:300px;overflow:auto;padding-right:4px}
-.bar-row{display:grid;grid-template-columns:minmax(0,170px) 1fr 34px;gap:10px;align-items:center;font-size:13px}
+.bar-row{display:grid;grid-template-columns:minmax(0,150px) 1fr auto;gap:10px;align-items:center;font-size:13px}
+.bar-row .c small{color:var(--muted);font-weight:500}
+.bar-row.low .c{color:var(--bad)}
+.bar-row.low .t span{background:var(--bad)}
+.pw{display:flex;flex-direction:column;gap:10px}
+.pw-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center}
+.pw-row .n{font-weight:600}
+.pw-row .c{font-variant-numeric:tabular-nums;font-weight:600;color:var(--plum)}
+.pw-row .t{grid-column:1/-1;height:10px;border-radius:999px;background:var(--lilac-soft);overflow:hidden}
+.pw-row .t span{display:block;height:100%;border-radius:999px}
 .bar-row .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bar-row .t{height:10px;background:var(--lilac-soft);border-radius:999px;overflow:hidden}
 .bar-row .t span{display:block;height:100%;background:linear-gradient(90deg,var(--lilac-deep),var(--plum));border-radius:999px}
@@ -177,17 +201,21 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
     <div class="kpi"><span class="l">Submissions</span><span class="v" id="kTotal">0</span><span class="s" id="kTotalS">&nbsp;</span></div>
     <div class="kpi"><span class="l">Unique employees</span><span class="v" id="kUnique">0</span><span class="s">by Employee ID</span></div>
     <div class="kpi warn"><span class="l">Duplicate IDs</span><span class="v" id="kDup">0</span><span class="s">rows flagged YES</span></div>
-    <div class="kpi"><span class="l">Avg quiz score</span><span class="v" id="kAvg">–</span><span class="s" id="kPerfect">&nbsp;</span></div>
+    <div class="kpi"><span class="l">Avg 1st-try score</span><span class="v" id="kAvg">–</span><span class="s" id="kPerfect">&nbsp;</span></div>
     <div class="kpi"><span class="l">Top prize</span><span class="v" id="kTop" style="font-size:20px;padding-top:6px">–</span><span class="s" id="kTopS">&nbsp;</span></div>
   </section>
 
   <section class="panels">
     <div class="panel">
-      <h3>Prizes given</h3>
+      <h3>Vouchers given · left in stock</h3>
       <div class="bars" id="prizeBars"><p class="empty-s">No prizes yet.</p></div>
     </div>
     <div class="panel">
-      <h3>Booth questions answered correctly</h3>
+      <h3>Power Up results</h3>
+      <div class="pw" id="powerStats"><p class="empty-s">No results yet.</p></div>
+    </div>
+    <div class="panel">
+      <h3>Correct on first try, by station</h3>
       <div id="quizStats"><p class="empty-s">No answers yet.</p></div>
     </div>
   </section>
@@ -198,8 +226,8 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
     <select id="fFlag" aria-label="Filter rows">
       <option value="">All rows</option>
       <option value="dup">Duplicate IDs only</option>
-      <option value="perfect">Perfect score (3/3)</option>
-      <option value="imperfect">Missed a question</option>
+      <option value="perfect">Perfect first try</option>
+      <option value="imperfect">Needed retries</option>
     </select>
     <span class="count" id="count"></span>
     <span style="flex:1"></span>
@@ -230,18 +258,21 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
     { key: "submittedAt", label: "Submitted", type: "date" },
     { key: "fullName", label: "Full Name", type: "name", sticky: true },
     { key: "employeeId", label: "Employee ID", type: "mono" },
-    { key: "score", label: "Score", type: "score" },
-    { key: "prizeCategory", label: "Prize Category", type: "mid" },
+    { key: "ref", label: "Claim Code", type: "mono" },
     { key: "prize", label: "Prize", type: "mid" },
+    { key: "prizeCategory", label: "Prize Category", type: "mid" },
     { key: "duplicateId", label: "Duplicate?", type: "dup" },
-    { key: "q1_empower", label: "Q1 Empower", type: "long" },
-    { key: "q2_inspire", label: "Q2 Inspire", type: "long" },
-    { key: "q2_inspire_correct", label: "Q2 ✓", type: "yn" },
-    { key: "q3_hawa", label: "Q3 HAWA", type: "long" },
-    { key: "q3_hawa_correct", label: "Q3 ✓", type: "yn" },
-    { key: "q4_care", label: "Q4 Care", type: "long" },
-    { key: "q4_care_correct", label: "Q4 ✓", type: "yn" },
-    { key: "q5_experience", label: "Q5 Experience", type: "long" },
+    { key: "first_try_score", label: "1st-try Score", type: "score" },
+    { key: "power_result", label: "Power Up", type: "power" },
+    { key: "connect_score", label: "Connect", type: "score" },
+    { key: "inspire_first", label: "Inspire \u2713", type: "yn" },
+    { key: "hawa_first", label: "HAWA \u2713", type: "yn" },
+    { key: "care_score", label: "Clinic", type: "score" },
+    { key: "empower_text", label: "Empower: Initiative", type: "long" },
+    { key: "experience_text", label: "Overall Experience", type: "long" },
+    { key: "power_answers", label: "Power Up Answers", type: "long" },
+    { key: "wrong_tries", label: "Wrong Tries", type: "num" },
+    { key: "durationMin", label: "Minutes", type: "num" },
     { key: "startedAt", label: "Started", type: "date" },
     { key: "submissionId", label: "Submission ID", type: "mono" }
   ];
@@ -346,10 +377,10 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
     var total = data.length;
     var ids = {}; data.forEach(function (r) { ids[String(r.employeeId || "").toUpperCase()] = 1; });
     var dups = data.filter(function (r) { return String(r.duplicateId).toUpperCase() === "YES"; }).length;
-    var scored = data.map(function (r) { return scoreNum(r.score); }).filter(Boolean);
+    var scored = data.map(function (r) { return scoreNum(r.first_try_score); }).filter(Boolean);
     var avg = scored.length ? scored.reduce(function (a, s) { return a + s[0]; }, 0) / scored.length : null;
     var perfect = scored.filter(function (s) { return s[0] === s[1]; }).length;
-    var max = scored.length ? scored[0][1] : 3;
+    var max = scored.length ? scored[0][1] : 11;
 
     $("kTotal").textContent = total;
     var today = new Date().toDateString();
@@ -357,40 +388,52 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
     $("kTotalS").textContent = todayN + " today";
     $("kUnique").textContent = Object.keys(ids).filter(Boolean).length;
     $("kDup").textContent = dups;
-    $("kAvg").textContent = avg == null ? "–" : avg.toFixed(1) + " / " + max;
-    $("kPerfect").textContent = scored.length ? perfect + " perfect score" + (perfect === 1 ? "" : "s") : " ";
+    $("kAvg").textContent = avg == null ? "\u2013" : avg.toFixed(1) + " / " + max;
+    $("kPerfect").textContent = scored.length ? perfect + " perfect" : " ";
 
-    // prizes grouped by category
-    var cats = {}, prizes = {};
-    data.forEach(function (r) {
-      if (!r.prize) return;
-      cats[r.prizeCategory || "Other"] = (cats[r.prizeCategory || "Other"] || 0) + 1;
-      var k = (r.prizeCategory || "Other") + "\u0000" + r.prize;
-      prizes[k] = (prizes[k] || 0) + 1;
+    // vouchers: given vs stock
+    var given = {};
+    data.forEach(function (r) { if (r.prize) given[r.prize] = (given[r.prize] || 0) + 1; });
+    var top = Object.keys(given).sort(function (a, b) { return given[b] - given[a]; })[0];
+    $("kTop").textContent = top || "\u2013";
+    $("kTopS").textContent = top ? given[top] + " given" : " ";
+    var STOCK = CFG.STOCK || {}, html = "";
+    (CFG.CATEGORIES || []).forEach(function (g) {
+      var cg = g[1].reduce(function (a, n) { return a + (given[n] || 0); }, 0);
+      var cs = g[1].reduce(function (a, n) { return a + (STOCK[n] || 0); }, 0);
+      html += '<div class="bar-row cat"><span class="n">' + esc(g[0]) + '</span><span></span><span class="c">' + cg + " <small>/ " + cs + "</small></span></div>";
+      g[1].forEach(function (n) {
+        var gv = given[n] || 0, st = STOCK[n] || 0, left = st - gv, low = st && left <= Math.max(5, st * 0.1);
+        html += '<div class="bar-row' + (low ? " low" : "") + '"><span class="n" title="' + esc(n) + '">' + esc(n) +
+          '</span><span class="t"><span style="width:' + (st ? Math.min(100, gv / st * 100) : 0) + '%"></span></span><span class="c">' + gv +
+          " <small>/ " + st + (low ? " \u00B7 " + Math.max(0, left) + " left" : "") + "</small></span></div>";
+      });
     });
-    var top = Object.keys(prizes).sort(function (a, b) { return prizes[b] - prizes[a]; })[0];
-    $("kTop").textContent = top ? top.split("\u0000")[1] : "–";
-    $("kTopS").textContent = top ? prizes[top] + " given" : " ";
-
-    var maxN = Math.max.apply(null, [1].concat(Object.keys(prizes).map(function (k) { return prizes[k]; })));
-    var html = "";
-    Object.keys(cats).sort(function (a, b) { return cats[b] - cats[a]; }).forEach(function (c) {
-      html += '<div class="bar-row cat"><span class="n">' + esc(c) + '</span><span></span><span class="c">' + cats[c] + "</span></div>";
-      Object.keys(prizes).filter(function (k) { return k.indexOf(c + "\u0000") === 0; })
-        .sort(function (a, b) { return prizes[b] - prizes[a]; })
-        .forEach(function (k) {
-          html += '<div class="bar-row"><span class="n" title="' + esc(k.split("\u0000")[1]) + '">' + esc(k.split("\u0000")[1]) +
-                  '</span><span class="t"><span style="width:' + (prizes[k] / maxN * 100) + '%"></span></span><span class="c">' + prizes[k] + "</span></div>";
-        });
-    });
+    var unknown = Object.keys(given).filter(function (n) { return !(n in STOCK); });
+    unknown.forEach(function (n) { html += '<div class="bar-row"><span class="n">' + esc(n) + '</span><span></span><span class="c">' + given[n] + "</span></div>"; });
     $("prizeBars").innerHTML = html || '<p class="empty-s">No prizes yet.</p>';
 
-    var qs = [["q2_inspire_correct", "Q2 · Inspire"], ["q3_hawa_correct", "Q3 · HAWA"], ["q4_care_correct", "Q4 · Care Clinic"]];
+    // power up results
+    var pr = {}, colors = { "Courageous Leader": "var(--plum)", "Creative Changemaker": "var(--lilac-deep)", "Community Builder": "var(--mint)" };
+    data.forEach(function (r) { if (r.power_result) pr[r.power_result] = (pr[r.power_result] || 0) + 1; });
+    var pk = Object.keys(colors).concat(Object.keys(pr).filter(function (k) { return !(k in colors); }));
+    $("powerStats").innerHTML = total ? pk.map(function (k) {
+      var n = pr[k] || 0, pct = Math.round(n / total * 100);
+      return '<div class="pw-row"><span class="n">' + esc(k) + '</span><span class="c">' + n + " \u00B7 " + pct + '%</span><span class="t"><span style="width:' + pct + "%;background:" + (colors[k] || "var(--plum)") + '"></span></span></div>';
+    }).join("") : '<p class="empty-s">No results yet.</p>';
+
+    // first-try accuracy by station
+    function ratio(key) {
+      var a = 0, b = 0;
+      data.forEach(function (r) { var s = scoreNum(r[key]); if (s) { a += s[0]; b += s[1]; } });
+      return b ? [a, b] : null;
+    }
+    function yes(key) { var y = data.filter(function (r) { return String(r[key]).toLowerCase() === "yes"; }).length; return total ? [y, total] : null; }
+    var qs = [["Connect \u00B7 Origin Awards", ratio("connect_score")], ["Inspire", yes("inspire_first")], ["HAWA Logo", yes("hawa_first")], ["Care Clinic", ratio("care_score")]];
     $("quizStats").innerHTML = total ? qs.map(function (q) {
-      var yes = data.filter(function (r) { return String(r[q[0]]).toLowerCase() === "yes"; }).length;
-      var pct = Math.round(yes / total * 100);
-      return '<div class="qrow"><span class="q">' + q[1] + '</span><span class="pct">' + pct + "% · " + yes + "/" + total +
-             '</span><span class="split"><span style="width:' + pct + '%"></span></span></div>';
+      if (!q[1]) return "";
+      var pct = Math.round(q[1][0] / q[1][1] * 100);
+      return '<div class="qrow"><span class="q">' + q[0] + '</span><span class="pct">' + pct + '%</span><span class="split"><span style="width:' + pct + '%"></span></span></div>';
     }).join("") : '<p class="empty-s">No answers yet.</p>';
   }
 
@@ -408,7 +451,7 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
     view = data.filter(function (r) {
       if (cat && r.prizeCategory !== cat) return false;
       if (flag === "dup" && String(r.duplicateId).toUpperCase() !== "YES") return false;
-      var s = scoreNum(r.score);
+      var s = scoreNum(r.first_try_score);
       if (flag === "perfect" && !(s && s[0] === s[1])) return false;
       if (flag === "imperfect" && !(s && s[0] < s[1])) return false;
       if (q) {
@@ -419,7 +462,8 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
     });
     view.sort(function (a, b) {
       var x = a[sortKey], y = b[sortKey];
-      if (sortKey === "score") { x = (scoreNum(x) || [-1])[0]; y = (scoreNum(y) || [-1])[0]; }
+      if (/score$/.test(sortKey)) { x = (scoreNum(x) || [-1])[0]; y = (scoreNum(y) || [-1])[0]; }
+      else if (sortKey === "wrong_tries" || sortKey === "durationMin") { x = +x || 0; y = +y || 0; }
       else if (/At$/.test(sortKey)) { x = new Date(x).getTime() || 0; y = new Date(y).getTime() || 0; }
       else { x = String(x || "").toLowerCase(); y = String(y || "").toLowerCase(); }
       return x < y ? -sortDir : x > y ? sortDir : 0;
@@ -443,6 +487,8 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
         return "<td>" + (String(v).toUpperCase() === "YES" ? '<span class="pill dup">YES</span>' : "") + "</td>";
       case "long": return '<td class="long"><div title="Click to expand">' + esc(v) + "</div></td>";
       case "mid": return '<td class="mid">' + esc(v) + "</td>";
+      case "num": return '<td class="num">' + esc(v) + "</td>";
+      case "power": return "<td>" + (v ? '<span class="pill score">' + esc(v) + "</span>" : "") + "</td>";
       default: return "<td>" + esc(v) + "</td>";
     }
   }
@@ -462,7 +508,7 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
   $("thead").addEventListener("click", function (e) {
     var th = e.target.closest("th[data-key]"); if (!th) return;
     var k = th.getAttribute("data-key");
-    if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = /At$|score/.test(k) ? -1 : 1; }
+    if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = /At$|score$/.test(k) ? -1 : 1; }
     applyView();
   });
   $("tbody").addEventListener("click", function (e) {
@@ -511,23 +557,23 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
   function demoRows() {
     var people = [["Aisha Al Balushi", "PDO1234"], ["Maryam Al Hinai", "PDO2210"], ["Fatma Al Rawahi", "PDO3307"], ["Noor Al Kindi", "PDO1188"],
       ["Salma Al Harthy", "PDO4502"], ["Huda Al Lawati", "PDO2675"], ["Reem Al Siyabi", "PDO3391"], ["Aisha Al Balushi", "PDO1234"]];
-    var pr = [["Beauty / Salon", "Asia Spa"], ["Hotel", "Grand Hyatt Muscat"], ["Restaurant / Café", "Laduree"], ["Fitness", "One O One Gym"],
-      ["Beauty / Salon", "Lime Spa"], ["Hospital", "Burjeel Hospital Muscat"], ["Flowers", "Floward Business"], ["Beauty / Salon", "Asia Spa"]];
+    var pr = [["Beauty / Salon", "Asia Spa"], ["Hotel", "Grand Hyatt Muscat"], ["Restaurant / Caf\u00E9", "Laduree"], ["Fitness", "One O One Gym"],
+      ["Beauty / Salon", "Lime Spa"], ["Hospital", "Burjeel Hospital Muscat"], ["Flowers / Workshops", "Floward Business"], ["Beauty / Salon", "Asia Spa"]];
+    var pw = ["Courageous Leader", "Community Builder", "Creative Changemaker", "Courageous Leader", "Community Builder", "Courageous Leader", "Creative Changemaker", "Community Builder"];
     var now = Date.now();
     return people.map(function (p, i) {
-      var c2 = i % 4 !== 3, c3 = i % 3 !== 1, c4 = true, sc = [c2, c3, c4].filter(Boolean).length;
+      var c = 4 - (i % 3 === 1 ? 1 : 0), ins = i % 4 !== 3, hw = i % 3 !== 2, k = 5 - (i % 2), tot = c + (ins ? 1 : 0) + (hw ? 1 : 0) + k;
       return {
         submittedAt: new Date(now - (people.length - i) * 7 * 60000).toISOString(),
-        startedAt: new Date(now - (people.length - i) * 7 * 60000 - 9 * 60000).toISOString(),
-        fullName: p[0], employeeId: p[1], score: sc + "/3",
+        startedAt: new Date(now - (people.length - i) * 7 * 60000 - 14 * 60000).toISOString(),
+        fullName: p[0], employeeId: p[1], ref: ("D" + (48213 + i * 7919)).slice(0, 6),
         prizeCategory: pr[i][0], prize: pr[i][1], duplicateId: i === 7 ? "YES" : "",
-        q1_empower: ["A mentoring circle pairing new graduates with senior women engineers.", "Flexible hours for mothers returning from maternity leave.", "A women-in-leadership speaker series each quarter."][i % 3],
-        q2_inspire: c2 ? "A) It supports children's development, builds essential skills, and helps them reach their full potential" : "B) It is only needed when children start school",
-        q2_inspire_correct: c2 ? "Yes" : "No",
-        q3_hawa: c3 ? "D) All of the above" : "B) Build confidence and leadership skills", q3_hawa_correct: c3 ? "Yes" : "No",
-        q4_care: "A) High blood pressure", q4_care_correct: "Yes",
-        q5_experience: ["The wellness talks inspired me most; I'd love a fitness challenge next year.", "Loved the Care clinic checks. More networking sessions please!", "The panel discussion was the highlight."][i % 3],
-        submissionId: "demo-" + (1000 + i), device: "Demo", event: "HAWA Women's Day 2026"
+        first_try_score: tot + "/11", power_result: pw[i], connect_score: c + "/4",
+        inspire_first: ins ? "Yes" : "No", hawa_first: hw ? "Yes" : "No", care_score: k + "/5",
+        empower_text: ["A mentoring circle pairing new graduates with senior women engineers.", "Flexible hours for mothers returning from maternity leave.", "A women-in-leadership speaker series each quarter."][i % 3],
+        experience_text: ["The Origin Awards stories inspired me most; I'd love a fitness challenge next year.", "Loved the Care clinic checks. More networking sessions please!", "Power Up was the highlight."][i % 3],
+        power_answers: "Career | Courage | My Career | Take charge | Bold", wrong_tries: 11 - tot, durationMin: 12 + i,
+        submissionId: "demo-" + (1000 + i), device: "Demo", event: "HAWA Omani Women's Day 2026"
       };
     });
   }
