@@ -11,446 +11,460 @@
 
 <script>
 /* =====================================================================
-   CONFIG — the only line you need to edit.
-   Paste your Google Apps Script Web App URL (ends with /exec).
-   Leave empty "" to run in demo mode (nothing is saved).
+   CONFIG — the Google Apps Script Web App URL (ends with /exec).
+   Leave "" for demo mode (nothing is saved).
    ===================================================================== */
 window.PASSPORT_CONFIG = {
   ENDPOINT: "https://script.google.com/macros/s/AKfycbyPV7c0DYmWn_dWTqwZ7-vaP-q5HDjp5DBwjxFkIEqTb6z3RJ61iNUN-EaZlzPldF5M/exec",
-  EVENT: "HAWA Women's Day 2026"
+  EVENT: "HAWA Omani Women's Day 2026"
 };
 </script>
 
 <style>
 /* Layout: one centred passport card on the lilac/mint field; stamp row on top,
-   one booth per screen, sticky action bar at the bottom of the card. Single brand look. */
+   one step per screen, sticky action bar. Power Up stage swaps in a growing flower. */
 :root{
   --lilac:#bdaed6; --lilac-soft:#efe9f7; --lilac-deep:#9d86c6; --mint:#6dbd8c; --mint-soft:#e3f4ea;
   --plum:#612c90; --ink:#2c1747; --muted:#6f6385; --paper:#ffffff; --line:#e4dcef;
-  --ok:#2f8a57; --ok-bg:#e3f4ea; --bad:#b3364a; --bad-bg:#fbe8ec;
+  --ok:#2f8a57; --ok-bg:#e3f4ea; --bad:#b3364a; --bad-bg:#fbe8ec; --gold:#f2c14e;
   --display:"Reem Kufi","IBM Plex Sans","Segoe UI",system-ui,sans-serif;
   --body:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,Arial,sans-serif;
-  --radius:22px;
-  color-scheme:light;
+  --radius:22px; color-scheme:light;
 }
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html,body{min-height:100%;margin:0}
 body{
-  font-family:var(--body); font-size:16px; line-height:1.5; color:var(--ink);
-  background:var(--lilac);
+  font-family:var(--body); font-size:16px; line-height:1.5; color:var(--ink); background:var(--lilac);
   background-image:radial-gradient(ellipse 70% 55% at 50% 45%, var(--mint) 0%, #8cb6a6 35%, #a9b0c9 65%, var(--lilac) 100%);
-  background-attachment:fixed;
-  -webkit-text-size-adjust:100%;
+  background-attachment:fixed; -webkit-text-size-adjust:100%;
 }
 .bg-frame{position:fixed; inset:0; z-index:0; pointer-events:none; background:url("../assets/frame.webp") center/cover no-repeat; opacity:.55}
 .wrap{
-  position:relative; z-index:1; min-height:100vh; min-height:100dvh;
-  display:flex; flex-direction:column; align-items:center; gap:14px;
+  position:relative; z-index:1; min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; align-items:center; gap:14px;
   padding-block:calc(env(safe-area-inset-top,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 24px);
-  padding-left:max(16px, env(safe-area-inset-left,0px));
-  padding-right:max(16px, env(safe-area-inset-right,0px));
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px));
 }
-.brand{width:min(260px,62vw)}
-.brand img{display:block; width:100%; height:auto}
+.brand{width:min(240px,58vw)} .brand img{display:block; width:100%; height:auto}
+.card{width:100%; max-width:520px; background:var(--paper); border-radius:var(--radius); box-shadow:0 0 0 6px var(--plum), 0 0 0 10px var(--lilac), 0 24px 60px rgba(50,20,90,.32); overflow:hidden; display:flex; flex-direction:column}
 
-.card{
-  width:100%; max-width:520px; background:var(--paper); border-radius:var(--radius);
-  box-shadow:0 0 0 6px var(--plum), 0 0 0 10px var(--lilac), 0 24px 60px rgba(50,20,90,.32);
-  overflow:hidden; display:flex; flex-direction:column;
-}
-
-/* Passport header: stamps + progress */
-.passport{background:var(--lilac-soft); padding:16px 18px 14px; border-bottom:1px dashed var(--lilac-deep); display:flex; flex-direction:column; gap:12px}
-.passport[hidden]{display:none}
-.pp-top{display:flex; justify-content:space-between; align-items:baseline; gap:12px}
+/* Passport header */
+.passport{background:var(--lilac-soft); padding:14px 14px 12px; border-bottom:1px dashed var(--lilac-deep); display:flex; flex-direction:column; gap:10px}
+.pp-top{display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding-inline:4px}
 .pp-label{font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--plum)}
 .pp-step{font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums}
-.stamps{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(5,1fr); gap:6px}
-.stamp{display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0}
-.stamp .dot{
-  width:42px; height:42px; border-radius:50%; display:grid; place-items:center;
-  border:2px dashed var(--lilac-deep); color:var(--lilac-deep); background:var(--paper);
-  font-family:var(--body); font-weight:600; font-size:15px; transition:transform .35s cubic-bezier(.2,1.6,.4,1), background .2s, border-color .2s;
-}
-.stamp .name{font-size:10.5px; font-weight:600; color:var(--muted); text-align:center; line-height:1.15; overflow-wrap:anywhere}
+.stamps{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(7,1fr); gap:2px}
+.stamp{display:flex; flex-direction:column; align-items:center; gap:3px; min-width:0}
+.stamp .dot{width:34px; height:34px; border-radius:50%; display:grid; place-items:center; border:2px dashed var(--lilac-deep); color:var(--lilac-deep); background:var(--paper); font-weight:600; font-size:13px; transition:transform .35s cubic-bezier(.2,1.6,.4,1), background .2s}
+.stamp .name{font-size:9.5px; font-weight:600; color:var(--muted); text-align:center; line-height:1.1; overflow-wrap:anywhere}
 .stamp.current .dot{border-style:solid; border-color:var(--plum); color:var(--plum)}
-.stamp.done .dot{background:var(--plum); border:2px solid var(--plum); color:var(--paper); transform:rotate(-12deg)}
+.stamp.done .dot{background:var(--plum); border:2px solid var(--plum); color:#fff; transform:rotate(-12deg)}
 .stamp.done .name{color:var(--plum)}
 .bar{height:6px; background:var(--paper); border-radius:999px; overflow:hidden}
 .bar span{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--lilac-deep),var(--mint)); border-radius:999px; transition:width .4s ease}
 
 /* Screens */
-.screens{position:relative}
-.screen{padding:24px 22px 8px; display:flex; flex-direction:column; gap:16px; animation:enter .35s ease both}
-.screen[hidden]{display:none}
+.screen{padding:22px 22px 8px; display:flex; flex-direction:column; gap:16px; animation:enter .3s ease both}
 @keyframes enter{from{opacity:0; transform:translateX(18px)}to{opacity:1; transform:none}}
 .screen.back{animation-name:enterBack}
 @keyframes enterBack{from{opacity:0; transform:translateX(-18px)}to{opacity:1; transform:none}}
-
 .eyebrow{display:inline-flex; align-self:flex-start; align-items:center; gap:8px; font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--plum); background:var(--lilac-soft); padding:5px 12px; border-radius:999px}
 h1,h2{font-family:var(--display); color:var(--plum); margin:0; line-height:1.2; text-wrap:balance}
-h1{font-size:clamp(28px,7vw,36px)}
-h2{font-size:clamp(20px,5.2vw,24px)}
+h1{font-size:clamp(28px,7vw,36px)} h2{font-size:clamp(20px,5.2vw,24px)}
 .lead{margin:0; color:var(--muted)}
+.qcount{font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; margin:-8px 0 0}
 .hero-lily{width:84px; align-self:center; filter:drop-shadow(0 6px 12px rgba(70,40,110,.18))}
+.gate-ico{width:72px; height:72px; border-radius:22px; align-self:center; display:grid; place-items:center; font-family:var(--display); font-size:32px; color:#fff; background:linear-gradient(135deg,var(--plum),var(--lilac-deep)); box-shadow:0 10px 24px rgba(97,44,144,.3); transform:rotate(-6deg)}
+.gate-steps{margin:0; padding:14px 16px; background:var(--lilac-soft); border-radius:16px; display:flex; flex-direction:column; gap:6px; list-style:none; font-size:15px}
+.gate-steps li{display:flex; gap:10px} .gate-steps b{color:var(--plum)}
 
 .field{display:flex; flex-direction:column; gap:6px}
-label, .legend{font-weight:600; font-size:15px}
-input[type=text], textarea, select{
-  width:100%; font:inherit; font-size:16px; color:var(--ink); background:var(--paper);
-  border:1.5px solid var(--line); border-radius:14px; padding:13px 14px; transition:border-color .15s, box-shadow .15s;
-}
+label,.legend{font-weight:600; font-size:15px}
+input[type=text],textarea,select{width:100%; font:inherit; font-size:16px; color:var(--ink); background:var(--paper); border:1.5px solid var(--line); border-radius:14px; padding:13px 14px; transition:border-color .15s, box-shadow .15s}
 textarea{min-height:140px; resize:vertical}
 select{appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--plum) 50%),linear-gradient(135deg,var(--plum) 50%,transparent 50%); background-position:calc(100% - 20px) 55%,calc(100% - 14px) 55%; background-size:6px 6px; background-repeat:no-repeat; padding-right:40px}
-input:focus, textarea:focus, select:focus{outline:none; border-color:var(--plum); box-shadow:0 0 0 4px rgba(97,44,144,.15)}
+input:focus,textarea:focus,select:focus{outline:none; border-color:var(--plum); box-shadow:0 0 0 4px rgba(97,44,144,.15)}
 .invalid{border-color:var(--bad) !important}
 .hint{font-size:13px; color:var(--muted); display:flex; justify-content:space-between; gap:8px}
 .err{font-size:13px; color:var(--bad); min-height:1.2em; margin:0}
 
 /* Multiple choice */
 .options{display:flex; flex-direction:column; gap:10px; margin:0; padding:0; border:0}
-.opt{
-  position:relative; display:flex; gap:12px; align-items:flex-start; padding:14px; border:1.5px solid var(--line);
-  border-radius:16px; cursor:pointer; background:var(--paper); transition:border-color .15s, background .15s;
-}
+.opt{position:relative; display:flex; gap:12px; align-items:flex-start; padding:14px; border:1.5px solid var(--line); border-radius:16px; cursor:pointer; background:var(--paper); transition:border-color .15s, background .15s, opacity .2s}
 .opt input{position:absolute; opacity:0; pointer-events:none}
 .opt .key{flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-weight:600; font-size:14px; background:var(--lilac-soft); color:var(--plum)}
 .opt .txt{flex:1; min-width:0; padding-top:4px}
 .opt:hover{border-color:var(--lilac-deep)}
 .opt:has(input:checked){border-color:var(--plum); background:#f8f5fc}
-.opt:has(input:checked) .key{background:var(--plum); color:var(--paper)}
+.opt:has(input:checked) .key{background:var(--plum); color:#fff}
 .opt:has(input:focus-visible){box-shadow:0 0 0 4px rgba(97,44,144,.2)}
-.options.locked .opt{cursor:default}
 .opt.correct{border-color:var(--ok) !important; background:var(--ok-bg) !important}
 .opt.correct .key{background:var(--ok) !important; color:#fff !important}
-.opt.wrong{border-color:var(--bad) !important; background:var(--bad-bg) !important}
+.opt.wrong{border-color:var(--bad) !important; background:var(--bad-bg) !important; opacity:.6; cursor:not-allowed}
 .opt.wrong .key{background:var(--bad) !important; color:#fff !important}
-
-.feedback{display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:14px; font-size:15px; animation:enter .3s ease both}
-.feedback[hidden]{display:none}
-.feedback.ok{background:var(--ok-bg); color:var(--ok)}
-.feedback.bad{background:var(--bad-bg); color:var(--bad)}
+.options.locked .opt{cursor:default}
+.feedback{display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border-radius:14px; font-size:15px; animation:enter .25s ease both}
+.feedback.ok{background:var(--ok-bg); color:var(--ok)} .feedback.bad{background:var(--bad-bg); color:var(--bad)}
 .feedback b{display:block}
+.shake{animation:shake .35s ease}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+/* Power Up */
+.power{padding:20px 18px 10px; text-align:center; align-items:center; gap:12px; background:radial-gradient(ellipse 80% 60% at 50% 32%, #f3ecfb 0%, #fff 70%)}
+.power-title{font-family:var(--display); color:var(--plum); font-size:clamp(24px,6.4vw,30px); letter-spacing:.04em; margin:0}
+.flower{width:190px; height:190px; display:block}
+.flower .petal{fill:#fff; stroke:var(--lilac-deep); stroke-width:2; stroke-dasharray:5 5; transition:fill .4s ease, stroke .4s ease}
+.flower .petal.on{fill:url(#petalGrad); stroke:#fff; stroke-dasharray:none; filter:url(#glow)}
+.flower .petal.new{animation:bloom .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes bloom{from{opacity:.2}to{opacity:1}}
+.flower .core{fill:var(--lilac-soft); stroke:var(--lilac-deep); stroke-width:2; transition:fill .4s}
+.flower.full .core{fill:var(--gold); stroke:#fff}
+.flower.full{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.05)}}
+.meter{width:100%; max-width:300px; display:flex; flex-direction:column; gap:4px}
+.meter-bar{height:12px; border-radius:999px; background:var(--lilac-soft); overflow:hidden; box-shadow:inset 0 0 0 1px var(--line)}
+.meter-bar span{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--lilac-deep),var(--plum),var(--gold)); border-radius:999px; transition:width .45s ease}
+.meter-label{font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-variant-numeric:tabular-nums}
+.pq{font-family:var(--display); font-size:clamp(21px,5.6vw,25px); color:var(--ink); margin:4px 0 0; min-height:1.3em}
+.pq-wrap{width:100%; display:flex; flex-direction:column; gap:12px; animation:enter .25s ease both}
+.chips{display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%}
+.chip{appearance:none; font:inherit; font-weight:600; font-size:16px; color:var(--plum); background:var(--paper); border:1.5px solid var(--lilac-deep); border-radius:16px; padding:16px 10px; cursor:pointer; transition:transform .12s, background .15s, color .15s; min-height:58px}
+.chip:active{transform:scale(.96)}
+.chip:focus-visible{outline:3px solid var(--mint); outline-offset:2px}
+.chip.picked{background:var(--plum); color:#fff; border-color:var(--plum)}
+.result{display:flex; flex-direction:column; gap:6px; align-items:center; animation:pop .6s cubic-bezier(.2,1.6,.4,1) both}
+.result .k{font-size:13px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.result .v{font-family:var(--display); font-size:clamp(28px,8vw,38px); line-height:1.1; color:var(--plum); text-transform:uppercase; letter-spacing:.02em}
+.result .d{color:var(--muted); max-width:30ch; margin:0}
+.result .own{font-family:var(--display); font-size:22px; color:var(--ok); margin-top:6px}
 
 /* Prize */
 .prize-box{display:flex; gap:14px; align-items:center; padding:14px; border-radius:16px; background:var(--mint-soft)}
-.prize-box[hidden]{display:none}
 .wheel{flex:none; width:48px; height:48px; border-radius:50%; background:conic-gradient(var(--plum) 0 60deg,var(--mint) 60deg 120deg,var(--lilac-deep) 120deg 180deg,var(--plum) 180deg 240deg,var(--mint) 240deg 300deg,var(--lilac-deep) 300deg); box-shadow:inset 0 0 0 4px #fff}
 .prize-box .cat{font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--ok); font-weight:600}
 .prize-box .pname{font-weight:600}
-
-/* Review list */
 .review{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; font-size:14px}
 .review li{display:flex; justify-content:space-between; gap:12px; padding-bottom:8px; border-bottom:1px solid var(--line)}
 .review li span:last-child{font-weight:600; text-align:right; min-width:0; overflow-wrap:anywhere}
 
 /* Actions */
 .actions{position:sticky; bottom:0; display:flex; gap:10px; padding:14px 22px calc(18px + env(safe-area-inset-bottom,0px)); background:linear-gradient(to top,var(--paper) 75%,rgba(255,255,255,0))}
-.actions[hidden]{display:none}
 .btn{appearance:none; border:0; font:inherit; font-weight:600; font-size:16px; border-radius:999px; padding:14px 22px; cursor:pointer; transition:transform .1s, background .15s, opacity .15s; min-height:52px}
 .btn:active{transform:scale(.98)}
 .btn:focus-visible{outline:3px solid var(--mint); outline-offset:3px}
 .btn-primary{flex:1; background:var(--plum); color:#fff}
-.btn-primary:disabled{opacity:.55; cursor:not-allowed}
+.btn-primary:disabled{opacity:.5; cursor:not-allowed}
 .btn-ghost{background:var(--lilac-soft); color:var(--plum)}
-.btn-ghost[hidden]{display:none}
 .spinner{display:inline-block; width:18px; height:18px; border:3px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spin .8s linear infinite; vertical-align:-3px; margin-right:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Success */
+/* Done */
 .success{text-align:center; align-items:center; padding-bottom:28px}
 .seal{width:96px; height:96px; border-radius:50%; display:grid; place-items:center; background:var(--plum); color:#fff; box-shadow:0 0 0 8px var(--lilac-soft); animation:pop .6s cubic-bezier(.2,1.6,.4,1) both}
 @keyframes pop{from{transform:scale(.3) rotate(-30deg); opacity:0}to{transform:none; opacity:1}}
-.ref{font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums}
+.claim{width:100%; border:2px dashed var(--plum); border-radius:18px; padding:14px; display:flex; flex-direction:column; gap:4px; background:#fbf9fe}
+.claim .k{font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.claim .v{font-weight:600; font-size:17px}
+.claim .code{font-family:var(--display); font-size:28px; letter-spacing:.12em; color:var(--plum)}
+.ref{font-size:13px; color:var(--muted); margin:0}
 .demo-note{font-size:12px; color:var(--bad); background:var(--bad-bg); padding:6px 10px; border-radius:10px}
-.demo-note[hidden]{display:none}
-
-.foot{font-family:var(--display); color:#fff; font-size:18px; text-shadow:0 2px 8px rgba(60,30,100,.35)}
-
+.foot{font-family:var(--display); color:#fff; font-size:18px; text-shadow:0 2px 8px rgba(60,30,100,.35); margin:0}
 .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+@media (max-width:360px){.stamp .dot{width:30px;height:30px;font-size:12px}.stamp .name{font-size:8.5px}}
 @media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important}}
 </style>
 </head>
 <body>
 <div class="bg-frame" aria-hidden="true"></div>
-
 <div class="wrap">
   <div class="brand"><img src="../assets/logos.webp" alt="For Oman"></div>
-
-  <main class="card" aria-live="polite">
-    <!-- Passport stamps (hidden on welcome + success) -->
+  <main class="card">
     <header class="passport" id="passport" hidden>
-      <div class="pp-top">
-        <span class="pp-label" id="ppLabel">Booth passport</span>
-        <span class="pp-step" id="ppStep">Step 1 of 6</span>
-      </div>
-      <ol class="stamps" id="stamps" aria-label="Booths visited"></ol>
+      <div class="pp-top"><span class="pp-label" id="ppLabel">Booth passport</span><span class="pp-step" id="ppStep"></span></div>
+      <ol class="stamps" id="stamps" aria-label="Stations completed"></ol>
       <div class="bar" aria-hidden="true"><span id="barFill"></span></div>
     </header>
-
-    <div class="screens" id="screens">
-      <!-- STEP 1: Identification -->
-      <section class="screen" data-screen="welcome" id="s-welcome">
-        <img class="hero-lily" src="../assets/lily-b.webp" alt="" aria-hidden="true">
-        <span class="eyebrow">Digital passport</span>
-        <h1>Welcome to HAWA</h1>
-        <p class="lead">Visit each booth, answer one question at every stop, then record the prize you won on the wheel.</p>
-        <div class="field">
-          <label for="fullName">Full Name</label>
-          <input id="fullName" type="text" autocomplete="name" autocapitalize="words" maxlength="80" placeholder="e.g. Aisha Al Balushi">
-          <p class="err" id="fullNameErr"></p>
-        </div>
-        <div class="field">
-          <label for="employeeId">Employee ID</label>
-          <input id="employeeId" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="20" placeholder="e.g. 123456">
-          <p class="err" id="employeeIdErr"></p>
-        </div>
-      </section>
-
-      <!-- STEPS 2: questions are rendered here by JS -->
-      <div id="questionMount"></div>
-
-      <!-- STEP 3: Prize -->
-      <section class="screen" data-screen="prize" id="s-prize" hidden>
-        <span class="eyebrow">Spin the Wheel</span>
-        <h2>Which prize did you win?</h2>
-        <p class="lead">Spin the wheel at the prize desk, then pick the exact prize below.</p>
-        <div class="field">
-          <label for="prize">Your prize</label>
-          <select id="prize">
-            <option value="" selected disabled>Select your prize…</option>
-          </select>
-          <p class="err" id="prizeErr"></p>
-        </div>
-        <div class="prize-box" id="prizeBox" hidden>
-          <div class="wheel" aria-hidden="true"></div>
-          <div><div class="cat" id="prizeCat"></div><div class="pname" id="prizeName"></div></div>
-        </div>
-        <ul class="review" id="review" aria-label="Your details"></ul>
-        <p class="err" id="submitErr" role="alert"></p>
-      </section>
-
-      <!-- STEP 4: Success -->
-      <section class="screen success" data-screen="done" id="s-done" hidden>
-        <div class="seal" aria-hidden="true">
-          <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
-        </div>
-        <h1>Thank you!</h1>
-        <p class="lead">Your participation and prize have been recorded.</p>
-        <p class="ref" id="refLine"></p>
-        <p class="demo-note" id="demoNote" hidden>Demo mode: no endpoint is set, so this entry was not saved.</p>
-      </section>
-    </div>
-
+    <div id="mount" aria-live="polite"></div>
     <footer class="actions" id="actions">
       <button class="btn btn-ghost" id="backBtn" type="button" hidden>Back</button>
       <button class="btn btn-primary" id="nextBtn" type="button">Start</button>
     </footer>
   </main>
-
-  <p class="foot">Together we thrive</p>
+  <p class="foot">Own your power</p>
 </div>
 
 <script>
 (function () {
   "use strict";
 
-  /* ------------------------------------------------------------------
-     CONTENT — booths, questions and prizes
-     ------------------------------------------------------------------ */
-  var QUESTIONS = [
-    { id: "empower", booth: "Empower", short: "E", type: "text",
-      q: "If you could introduce one new initiative to further empower women at PDO, what would it be?",
-      min: 10 },
-    { id: "inspire", booth: "Inspire", short: "I", type: "mcq",
-      q: "Why is early intervention important for children with disabilities?",
-      options: [
-        "It supports children's development, builds essential skills, and helps them reach their full potential",
-        "It is only needed when children start school",
-        "It focuses only on a child's difficulties"
-      ], correct: 0 },
-    { id: "hawa", booth: "HAWA", short: "H", type: "mcq",
-      q: "What does HAWA help women at PDO do?",
-      options: [
-        "Connect and support one another",
-        "Build confidence and leadership skills",
-        "Access development and wellbeing opportunities",
-        "All of the above"
-      ], correct: 3 },
-    { id: "care", booth: "Care Clinic", short: "C", type: "mcq",
-      q: "Which health condition is often called the “silent killer” because it may have no noticeable symptoms?",
-      options: ["High blood pressure", "Seasonal allergies", "Common cold", "Acid reflux"],
-      correct: 0 },
-    { id: "experience", booth: "Experience", short: "★", type: "text",
-      q: "What inspired you most about HAWA this year, which activity did you enjoy most, and what would you love to see from HAWA next year?",
-      min: 10 }
+  /* ==================================================================
+     CONTENT — edit questions, answers and prizes here
+     ================================================================== */
+  var STAGES = [
+    { id: "connect", name: "Connect", icon: "C",
+      gate: { eyebrow: "Game 1 · The Origin Awards", title: "Connect the Women Achievement",
+        text: "Go to the Origin Awards wall and connect each woman to the milestone she achieved.",
+        steps: ["Read the five award stories", "Match each woman to her achievement", "Come back and answer 4 quick questions"],
+        btn: "Yes, I've played it" },
+      questions: [
+        { id: "c1", type: "mcq", q: "Who became the first Omani coach to earn the A License in Football Coaching?",
+          options: ["Ahlam Al Marjeby", "Wafa Al Sumri", "Zeyana Al Kindi", "Samah Al Rawahi"], correct: 0 },
+        { id: "c2", type: "mcq", q: "Wafa Al Sumri earned international recognition as a…",
+          options: ["Football coach", "Basketball referee", "Operations team leader", "Public service leader"], correct: 1 },
+        { id: "c3", type: "mcq", q: "Who is PDO's first female Operations Delivery Team Leader?",
+          options: ["Hanan Al Rumhi", "Samah Al Rawahi", "Zeyana Al Kindi", "Ahlam Al Marjeby"], correct: 2 },
+        { id: "c4", type: "mcq", q: "Which award did Samah Al Rawahi receive?",
+          options: ["Public Service Leader of the Year, Community Support", "International Basketball Referee", "First Omani Football Coach A License", "Young Global Omani Professional of the Year"], correct: 3 }
+      ] },
+
+    { id: "power", name: "Power Up", icon: "✿",
+      gate: { eyebrow: "Game 2", title: "Power Up Your HAWA",
+        text: "Answer five quick questions. Every answer lights up a petal of your HAWA flower and reveals your power.",
+        steps: ["Tap the answer that feels most like you", "Watch your flower bloom", "Discover your power"],
+        btn: "Yes, let's power up" },
+      power: [
+        { q: "What gives you strength?", options: [["Family", "B"], ["Career", "L"], ["Health", "C"], ["Friends", "B"]] },
+        { q: "What is your superpower?", options: [["Leadership", "L"], ["Creativity", "C"], ["Kindness", "B"], ["Courage", "L"]] },
+        { q: "What are you building?", options: [["My Career", "L"], ["My Family", "B"], ["Myself", "C"], ["My Community", "B"]] },
+        { q: "When a challenge comes, you…", options: [["Take charge", "L"], ["Try a new idea", "C"], ["Rally people", "B"], ["Keep going", "L"]] },
+        { q: "The woman you're becoming is…", options: [["Bold", "L"], ["Inventive", "C"], ["Generous", "B"], ["Inspiring", "C"]] }
+      ] },
+
+    { id: "empower", name: "Empower", icon: "E",
+      gate: { eyebrow: "Booth", title: "Empower", text: "Visit the Empower booth.", btn: "Yes, I visited it" },
+      questions: [
+        { id: "empower", type: "text", min: 10, q: "If you could introduce one new initiative to further empower women at PDO, what would it be?" }
+      ] },
+
+    { id: "inspire", name: "Inspire", icon: "I",
+      gate: { eyebrow: "Booth · AEICD", title: "Inspire", text: "Visit the Inspire booth and learn about AEICD's work with children.", btn: "Yes, I visited it" },
+      questions: [
+        { id: "inspire", type: "mcq", q: "Why is early intervention important for children with disabilities?",
+          options: ["It supports children's development, builds essential skills, and helps them reach their full potential",
+                    "It is only needed when children start school",
+                    "It focuses only on a child's difficulties rather than their abilities"], correct: 0,
+          note: "This highlights AEICD's mission: early intervention helps children develop, learn, and thrive." }
+      ] },
+
+    { id: "hawa", name: "HAWA", icon: "H",
+      gate: { eyebrow: "Booth", title: "HAWA Logo", text: "Visit the HAWA logo booth.", btn: "Yes, I visited it" },
+      questions: [
+        { id: "hawa", type: "mcq", q: "What does HAWA help women at PDO do?",
+          options: ["Connect and support one another", "Build confidence and leadership skills", "Access development and wellbeing opportunities", "All of the above"], correct: 3 }
+      ] },
+
+    { id: "care", name: "Clinic", icon: "+",
+      gate: { eyebrow: "Care Clinic", title: "Care Clinic", text: "Visit the Care clinic for your health check, then answer 5 quick health questions.", btn: "Yes, I visited the clinic" },
+      questions: [
+        { id: "k1", type: "mcq", q: "Which health condition is often called the “silent killer” because it may have no noticeable symptoms?",
+          options: ["High blood pressure", "Seasonal allergies", "Common cold", "Acid reflux"], correct: 0 },
+        { id: "k2", type: "mcq", q: "What is considered a normal blood pressure reading for adults?",
+          options: ["160/100 mmHg", "Below 120/80 mmHg", "145/95 mmHg", "180/110 mmHg"], correct: 1 },
+        { id: "k3", type: "mcq", q: "How much moderate physical activity is recommended for adults each week?",
+          options: ["30 minutes", "60 minutes", "At least 150 minutes", "None if you eat well"], correct: 2 },
+        { id: "k4", type: "mcq", q: "Which can be an early warning sign of diabetes?",
+          options: ["A runny nose", "Excessive thirst and frequent urination", "Itchy eyes", "Hiccups"], correct: 1 },
+        { id: "k5", type: "mcq", q: "How many hours of sleep do most adults need each night?",
+          options: ["4–5 hours", "5–6 hours", "7–9 hours", "10–12 hours"], correct: 2 }
+      ] },
+
+    { id: "experience", name: "Feedback", icon: "★", noGate: true,
+      questions: [
+        { id: "experience", type: "text", min: 10, q: "What inspired you most about HAWA this year, which activity did you enjoy most, and what would you love to see from HAWA next year?" }
+      ] }
   ];
 
+  var POWER_RESULTS = {
+    L: { title: "Courageous Leader", text: "You step forward when it matters, and others find their courage in you." },
+    C: { title: "Creative Changemaker", text: "You see new ways forward and turn bold ideas into real change." },
+    B: { title: "Community Builder", text: "You lift the people around you and bring them together." }
+  };
+
+  // From the vouchers list
   var PRIZES = [
-    { cat: "Beauty / Salon", items: ["Mermaid Center", "Bahar Home Nail", "Lebanon Flower Salon", "Asia Spa", "Lime Spa", "Eithz Spa", "Talha Salon", "Longevity", "Optimum Clinic"] },
+    { cat: "Beauty / Salon", items: ["Mermaid Center", "Bahar Home Nail", "Lebanon Flower Salon", "Asia Spa", "Lime Spa", "Eithz Spa", "Talha Salon for Fitness & Beauty", "Longevity", "Optimum Clinic"] },
     { cat: "Restaurant / Café", items: ["Laduree", "Silica Cafe"] },
     { cat: "Hotel", items: ["Grand Hyatt Muscat"] },
     { cat: "Hospital", items: ["Badr Al Samaa Royal Hospital", "Burjeel Hospital Muscat"] },
     { cat: "Fitness", items: ["One O One Gym", "Azer Gym"] },
-    { cat: "Flowers", items: ["Floward Business"] }
+    { cat: "Flowers / Workshops", items: ["Floward Business"] }
   ];
 
+  /* ================================================================== */
   var CFG = window.PASSPORT_CONFIG || {};
-  var STORE_KEY = "hawa-passport-v1";
-  var OUTBOX_KEY = "hawa-passport-outbox";
+  var STORE_KEY = "hawa-passport-v2", OUTBOX_KEY = "hawa-passport-outbox-v2";
   var LETTERS = "ABCDEFGH";
-
-  /* ------------------------------------------------------------------
-     STATE
-     ------------------------------------------------------------------ */
-  // steps: 0 = welcome, 1..5 = questions, 6 = prize, 7 = done
-  var state = {
-    step: 0,
-    fullName: "", employeeId: "",
-    answers: {},          // id -> text or option index
-    checked: {},          // mcq id -> true once checked (locked)
-    prize: "", prizeCategory: "",
-    submissionId: uid(),
-    startedAt: new Date().toISOString()
-  };
-
-  /* ------------------------------------------------------------------
-     DOM HELPERS
-     ------------------------------------------------------------------ */
   var $ = function (id) { return document.getElementById(id); };
-  function el(tag, attrs, html) {
-    var n = document.createElement(tag);
-    if (attrs) for (var k in attrs) n.setAttribute(k, attrs[k]);
-    if (html != null) n.innerHTML = html;
-    return n;
-  }
-  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-  function uid() {
-    try { return crypto.randomUUID(); } catch (e) {
-      return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
-    }
-  }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function uid() { try { return crypto.randomUUID(); } catch (e) { return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10); } }
+  var POWER_STAGE = STAGES.filter(function (s) { return s.power; })[0];
+
+  // Flatten stages into steps
+  var STEPS = [{ kind: "welcome" }];
+  STAGES.forEach(function (st, si) {
+    if (!st.noGate) STEPS.push({ kind: "gate", si: si });
+    if (st.power) STEPS.push({ kind: "power", si: si });
+    (st.questions || []).forEach(function (q, qi) { STEPS.push({ kind: q.type, si: si, q: q, qi: qi, of: st.questions.length }); });
+  });
+  STEPS.push({ kind: "prize" }, { kind: "done" });
+  var LAST = STEPS.length - 1;
+
+  var state = { step: 0, fullName: "", employeeId: "", text: {}, mcq: {}, gates: {}, power: [], prize: "", prizeCategory: "", submissionId: uid(), startedAt: new Date().toISOString(), ref: "", demo: false };
   function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
-  function load() {
-    try { var s = JSON.parse(localStorage.getItem(STORE_KEY)); if (s && s.submissionId) state = Object.assign(state, s); } catch (e) {}
-  }
-  function clearDraft() { try { localStorage.removeItem(STORE_KEY); } catch (e) {} }
+  function load() { try { var s = JSON.parse(localStorage.getItem(STORE_KEY)); if (s && s.submissionId) state = Object.assign(state, s); } catch (e) {} }
 
-  /* ------------------------------------------------------------------
-     BUILD QUESTION SCREENS + STAMPS + PRIZE LIST
-     ------------------------------------------------------------------ */
-  var mount = $("questionMount");
-  QUESTIONS.forEach(function (q, i) {
-    var s = el("section", { "class": "screen", "data-screen": "q", id: "s-" + q.id, hidden: "" });
-    var head = '<span class="eyebrow">Booth ' + (i + 1) + " · " + esc(q.booth) + "</span>" +
-               '<h2 id="h-' + q.id + '">' + esc(q.q) + "</h2>";
-    if (q.type === "text") {
-      s.innerHTML = head +
-        '<div class="field">' +
-          '<label class="sr-only" for="t-' + q.id + '">Your answer</label>' +
-          '<textarea id="t-' + q.id + '" maxlength="1000" placeholder="Type your answer here…" aria-describedby="c-' + q.id + '"></textarea>' +
-          '<div class="hint"><span>At least ' + q.min + ' characters</span><span id="c-' + q.id + '">0 / 1000</span></div>' +
-          '<p class="err" id="e-' + q.id + '"></p>' +
-        "</div>";
-    } else {
-      var opts = q.options.map(function (o, k) {
-        return '<label class="opt" data-k="' + k + '">' +
-                 '<input type="radio" name="r-' + q.id + '" value="' + k + '">' +
-                 '<span class="key">' + LETTERS[k] + "</span>" +
-                 '<span class="txt">' + esc(o) + "</span>" +
-               "</label>";
-      }).join("");
-      s.innerHTML = head +
-        '<fieldset class="options" id="o-' + q.id + '" aria-labelledby="h-' + q.id + '">' + opts + "</fieldset>" +
-        '<div class="feedback" id="f-' + q.id + '" role="status" hidden></div>' +
-        '<p class="err" id="e-' + q.id + '"></p>';
+  /* ---------------- stamps ---------------- */
+  STAGES.forEach(function (st, i) {
+    var li = document.createElement("li"); li.className = "stamp"; li.id = "st-" + i;
+    li.innerHTML = '<span class="dot" aria-hidden="true">' + esc(st.icon) + '</span><span class="name">' + esc(st.name) + "</span>";
+    $("stamps").appendChild(li);
+  });
+  function lastStepOfStage(si) { var l = 0; STEPS.forEach(function (s, i) { if (s.si === si) l = i; }); return l; }
+  function stageDone(si) {
+    var st = STAGES[si];
+    if (st.power) return state.power.length === st.power.length;
+    var allOk = st.questions.every(function (q) {
+      return q.type === "mcq" ? !!(state.mcq[q.id] && state.mcq[q.id].ok) : (state.text[q.id] || "").trim().length >= q.min;
+    });
+    return allOk && state.step > lastStepOfStage(si);
+  }
+
+  /* ---------------- rendering ---------------- */
+  var mount = $("mount");
+  function render(backwards, freshPetal) {
+    var s = STEPS[state.step];
+    var html = "", cls = "screen" + (backwards ? " back" : "");
+    if (s.kind === "welcome") {
+      html = '<section class="' + cls + '">' +
+        '<img class="hero-lily" src="../assets/lily-b.webp" alt="" aria-hidden="true">' +
+        '<span class="eyebrow">Digital passport</span><h1>Welcome to HAWA</h1>' +
+        '<p class="lead">Keep this page open on your phone. Play each game, visit every booth, answer the questions, then claim your prize at the wheel.</p>' +
+        '<div class="field"><label for="fullName">Full Name</label><input id="fullName" type="text" autocomplete="name" autocapitalize="words" maxlength="80" placeholder="e.g. Aisha Al Balushi" value="' + esc(state.fullName) + '"><p class="err" id="fullNameErr"></p></div>' +
+        '<div class="field"><label for="employeeId">Employee ID</label><input id="employeeId" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="20" placeholder="e.g. 123456" value="' + esc(state.employeeId) + '"><p class="err" id="employeeIdErr"></p></div>' +
+        "</section>";
+    } else if (s.kind === "gate") {
+      var g = STAGES[s.si].gate;
+      html = '<section class="' + cls + '"><div class="gate-ico" aria-hidden="true">' + esc(STAGES[s.si].icon) + "</div>" +
+        '<span class="eyebrow">' + esc(g.eyebrow) + "</span><h2>" + esc(g.title) + '</h2><p class="lead">' + esc(g.text) + "</p>" +
+        (g.steps ? '<ol class="gate-steps">' + g.steps.map(function (t, i) { return "<li><b>" + (i + 1) + "</b><span>" + esc(t) + "</span></li>"; }).join("") + "</ol>" : "") +
+        "</section>";
+    } else if (s.kind === "mcq") {
+      var q = s.q, m = state.mcq[q.id] || { wrong: [] };
+      html = '<section class="' + cls + '"><span class="eyebrow">' + esc(STAGES[s.si].name) + "</span>" +
+        (s.of > 1 ? '<p class="qcount">Question ' + (s.qi + 1) + " of " + s.of + "</p>" : "") +
+        '<h2 id="qh">' + esc(q.q) + "</h2>" +
+        '<fieldset class="options' + (m.ok ? " locked" : "") + '" id="opts" aria-labelledby="qh">' +
+        q.options.map(function (o, k) {
+          var c = m.ok && k === q.correct ? " correct" : m.wrong.indexOf(k) > -1 ? " wrong" : "";
+          var dis = m.ok || m.wrong.indexOf(k) > -1 ? " disabled" : "";
+          return '<label class="opt' + c + '" data-k="' + k + '"><input type="radio" name="opt" value="' + k + '"' + dis + (m.ok && k === q.correct ? " checked" : "") + '><span class="key">' + LETTERS[k] + '</span><span class="txt">' + esc(o) + "</span></label>";
+        }).join("") + "</fieldset>" +
+        '<div id="fb">' + (m.ok ? fbOk(q, m) : "") + '</div><p class="err" id="qerr"></p></section>';
+    } else if (s.kind === "text") {
+      var tq = s.q, v = state.text[tq.id] || "";
+      html = '<section class="' + cls + '"><span class="eyebrow">' + esc(STAGES[s.si].name) + "</span><h2>" + esc(tq.q) + "</h2>" +
+        '<div class="field"><label class="sr-only" for="ta">Your answer</label><textarea id="ta" maxlength="1000" placeholder="Type your answer here…">' + esc(v) + "</textarea>" +
+        '<div class="hint"><span>At least ' + tq.min + ' characters</span><span id="cnt">' + v.length + ' / 1000</span></div><p class="err" id="qerr"></p></div></section>';
+    } else if (s.kind === "power") {
+      html = renderPower(cls, freshPetal);
+    } else if (s.kind === "prize") {
+      var ft = firstTry();
+      html = '<section class="' + cls + '"><span class="eyebrow">Spin the Wheel</span><h2>Which prize did you win?</h2>' +
+        '<p class="lead">Spin the wheel at the prize desk, then select exactly what you won.</p>' +
+        '<div class="field"><label for="prize">Your prize</label><select id="prize"><option value="" disabled' + (state.prize ? "" : " selected") + ">Select your prize…</option>" +
+        PRIZES.map(function (g) { return '<optgroup label="' + esc(g.cat) + '">' + g.items.map(function (n) { return '<option value="' + esc(n) + '" data-cat="' + esc(g.cat) + '"' + (state.prize === n ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</optgroup>"; }).join("") +
+        '</select><p class="err" id="prizeErr"></p></div>' +
+        '<div class="prize-box" id="prizeBox"' + (state.prize ? "" : " hidden") + '><div class="wheel" aria-hidden="true"></div><div><div class="cat" id="prizeCat">' + esc(state.prizeCategory) + '</div><div class="pname" id="prizeName">' + esc(state.prize) + "</div></div></div>" +
+        '<ul class="review">' +
+        "<li><span>Name</span><span>" + esc(state.fullName) + "</span></li>" +
+        "<li><span>Employee ID</span><span>" + esc(state.employeeId) + "</span></li>" +
+        "<li><span>Stations completed</span><span>" + STAGES.length + " / " + STAGES.length + "</span></li>" +
+        "<li><span>Your power</span><span>" + esc(powerTitle()) + "</span></li>" +
+        "<li><span>Correct on first try</span><span>" + ft[0] + " / " + ft[1] + "</span></li>" +
+        '</ul><p class="err" id="submitErr" role="alert"></p></section>';
+    } else if (s.kind === "done") {
+      html = '<section class="' + cls + ' success"><div class="seal" aria-hidden="true"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>' +
+        '<h1>Thank you!</h1><p class="lead">Your participation and prize have been recorded.</p>' +
+        '<div class="claim"><span class="k">Show this at the prize desk</span><span class="v">' + esc(state.fullName) + " · " + esc(state.employeeId) + '</span><span class="v">' + esc(state.prize) + '</span><span class="code">' + esc(state.ref) + "</span></div>" +
+        '<p class="ref">' + esc(powerTitle() ? "Your power: " + powerTitle() : "") + "</p>" +
+        (state.demo ? '<p class="demo-note">Demo mode: no endpoint is set, so this entry was not saved.</p>' : "") + "</section>";
     }
-    mount.appendChild(s);
-  });
-
-  var stamps = $("stamps");
-  QUESTIONS.forEach(function (q, i) {
-    var li = el("li", { "class": "stamp", id: "st-" + i });
-    li.innerHTML = '<span class="dot" aria-hidden="true">' + esc(q.short) + '</span><span class="name">' + esc(q.booth) + "</span>";
-    stamps.appendChild(li);
-  });
-
-  var sel = $("prize");
-  PRIZES.forEach(function (g) {
-    var og = el("optgroup", { label: g.cat });
-    g.items.forEach(function (name) {
-      var o = el("option", { value: name, "data-cat": g.cat }); o.textContent = name; og.appendChild(o);
-    });
-    sel.appendChild(og);
-  });
-
-  /* ------------------------------------------------------------------
-     NAVIGATION
-     ------------------------------------------------------------------ */
-  var screens = ["s-welcome"].concat(QUESTIONS.map(function (q) { return "s-" + q.id; }), ["s-prize", "s-done"]);
-  var TOTAL_STEPS = QUESTIONS.length + 1; // 5 booths + prize
-
-  function show(step, backwards) {
-    state.step = step;
-    screens.forEach(function (id, i) {
-      var s = $(id); s.hidden = i !== step;
-      if (i === step) { s.classList.toggle("back", !!backwards); }
-    });
-    renderChrome();
-    save();
-    var s = $(screens[step]);
-    var focusable = s.querySelector("textarea, input:not([type=radio]), select");
-    if (focusable && step !== 0) setTimeout(function () { focusable.focus({ preventScroll: true }); }, 50);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    mount.innerHTML = html;
+    bindStep(s);
+    chrome();
   }
 
-  function renderChrome() {
-    var st = state.step;
-    var inPassport = st >= 1 && st <= QUESTIONS.length + 1;
-    $("passport").hidden = !inPassport;
-    $("actions").hidden = st === screens.length - 1;
-    $("backBtn").hidden = st === 0 || st === screens.length - 1;
+  function fbOk(q, m) {
+    return '<div class="feedback ok"><span>✔</span><div><b>' + (m.wrong.length ? "Correct now!" : "Correct!") + "</b>" + esc(q.note || "Well done.") + "</div></div>";
+  }
 
-    if (inPassport) {
-      var n = st; // 1..6
-      $("ppStep").textContent = "Step " + n + " of " + TOTAL_STEPS;
-      $("ppLabel").textContent = st <= QUESTIONS.length ? "Booth passport" : "Prize desk";
-      $("barFill").style.width = Math.round(((n - 1) / TOTAL_STEPS) * 100) + "%";
-      QUESTIONS.forEach(function (q, i) {
-        var li = $("st-" + i);
-        li.classList.toggle("done", isAnswered(i));
-        li.classList.toggle("current", st === i + 1);
+  /* ---------------- Power Up ---------------- */
+  function petalsSvg(n, full, fresh) {
+    var petals = "";
+    for (var i = 0; i < 5; i++) {
+      petals += '<path class="petal' + (i < n ? " on" : "") + (fresh && i === n - 1 ? " new" : "") + '" transform="rotate(' + (i * 72) + ' 100 100)" d="M100 96 C 72 70, 74 26, 100 12 C 126 26, 128 70, 100 96 Z"/>';
+    }
+    return '<svg class="flower' + (full ? " full" : "") + '" viewBox="0 0 200 200" aria-hidden="true"><defs>' +
+      '<linearGradient id="petalGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3d6f5"/><stop offset=".6" stop-color="#9d86c6"/><stop offset="1" stop-color="#612c90"/></linearGradient>' +
+      '<filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
+      "</defs>" + petals + '<circle class="core" cx="100" cy="100" r="17"/></svg>';
+  }
+  function powerResult() {
+    if (state.power.length < POWER_STAGE.power.length) return "";
+    var count = { L: 0, C: 0, B: 0 };
+    state.power.forEach(function (k, i) { count[POWER_STAGE.power[i].options[k][1]]++; });
+    var best = Object.keys(count).sort(function (a, b) { return count[b] - count[a]; });
+    if (count[best[0]] === count[best[1]]) return POWER_STAGE.power[1].options[state.power[1]][1]; // tie: superpower decides
+    return best[0];
+  }
+  function powerTitle() { var r = powerResult(); return r ? POWER_RESULTS[r].title : ""; }
+  function renderPower(cls, fresh) {
+    var n = state.power.length, total = POWER_STAGE.power.length, full = n === total;
+    var pct = Math.round(n / total * 100), body;
+    if (!full) {
+      var pq = POWER_STAGE.power[n];
+      body = '<div class="pq-wrap"><p class="qcount" style="margin:0">' + (n + 1) + " / " + total + '</p><p class="pq">' + esc(pq.q) + '</p><div class="chips">' +
+        pq.options.map(function (o, k) { return '<button class="chip" type="button" data-k="' + k + '">' + esc(o[0]) + "</button>"; }).join("") + "</div></div>";
+    } else {
+      var r = POWER_RESULTS[powerResult()];
+      body = '<div class="result"><span class="k">🌸 Full flower · Your power is</span><span class="v">' + esc(r.title) + '</span><p class="d">' + esc(r.text) + '</p><span class="own">Own your power.</span></div>';
+    }
+    return '<section class="' + cls + ' power"><p class="power-title">POWER UP YOUR HAWA</p>' + petalsSvg(n, full, fresh) +
+      '<div class="meter"><div class="meter-bar"><span style="width:' + pct + '%"></span></div><span class="meter-label">Energy ' + pct + "%</span></div>" + body + "</section>";
+  }
+
+  /* ---------------- per-step bindings ---------------- */
+  function bindStep(s) {
+    if (s.kind === "welcome") {
+      ["fullName", "employeeId"].forEach(function (id) {
+        $(id).addEventListener("input", function () { setErr(id, id + "Err", ""); });
+        $(id).addEventListener("keydown", function (e) { if (e.key === "Enter") $("nextBtn").click(); });
+      });
+    } else if (s.kind === "mcq") {
+      $("opts").addEventListener("change", function () { $("qerr").textContent = ""; updatePrimary(); });
+    } else if (s.kind === "text") {
+      var t = $("ta");
+      t.addEventListener("input", function () { $("cnt").textContent = t.value.length + " / 1000"; state.text[s.q.id] = t.value; if (t.value.trim().length >= s.q.min) setErr("ta", "qerr", ""); save(); });
+    } else if (s.kind === "power") {
+      var busy = false;
+      mount.querySelectorAll(".chip").forEach(function (b) {
+        b.addEventListener("click", function () {
+          if (busy) return; busy = true;
+          b.classList.add("picked");
+          state.power.push(+b.getAttribute("data-k")); save();
+          setTimeout(function () { render(false, true); }, 320);
+        });
+      });
+    } else if (s.kind === "prize") {
+      $("prize").addEventListener("change", function () {
+        var o = this.options[this.selectedIndex];
+        state.prize = this.value; state.prizeCategory = o.getAttribute("data-cat") || "";
+        $("prizeCat").textContent = state.prizeCategory; $("prizeName").textContent = state.prize; $("prizeBox").hidden = false;
+        setErr("prize", "prizeErr", ""); save();
       });
     }
-    updatePrimary();
   }
 
-  function isAnswered(i) {
-    var q = QUESTIONS[i];
-    if (q.type === "text") return (state.answers[q.id] || "").trim().length >= q.min && state.step > i + 1;
-    return !!state.checked[q.id];
-  }
-
-  function updatePrimary() {
-    var btn = $("nextBtn"), st = state.step;
-    btn.disabled = false;
-    if (st === 0) { btn.textContent = "Start"; return; }
-    if (st <= QUESTIONS.length) {
-      var q = QUESTIONS[st - 1];
-      if (q.type === "mcq" && !state.checked[q.id]) {
-        btn.textContent = "Check answer";
-        btn.disabled = state.answers[q.id] == null;
-      } else {
-        btn.textContent = st === QUESTIONS.length ? "Go to prize" : "Next booth";
-      }
-      return;
-    }
-    if (st === QUESTIONS.length + 1) { btn.textContent = "Submit"; }
-  }
-
-  /* ------------------------------------------------------------------
-     VALIDATION
-     ------------------------------------------------------------------ */
   function setErr(inputId, errId, msg) {
     var i = $(inputId), e = $(errId);
     if (i) i.classList.toggle("invalid", !!msg);
@@ -458,199 +472,141 @@ input:focus, textarea:focus, select:focus{outline:none; border-color:var(--plum)
     return !msg;
   }
 
-  function validateWelcome() {
-    var name = $("fullName").value.trim().replace(/\s+/g, " ");
-    var id = $("employeeId").value.trim().toUpperCase();
-    var ok1 = setErr("fullName", "fullNameErr",
-      name.length < 3 ? "Please enter your full name." :
-      name.split(" ").length < 2 ? "Please enter your first and last name." : "");
-    var ok2 = setErr("employeeId", "employeeIdErr",
-      !id ? "Please enter your Employee ID." :
-      !/^[A-Z0-9-]{3,20}$/.test(id) ? "Use 3–20 letters or numbers only." : "");
-    if (ok1 && ok2) { state.fullName = name; state.employeeId = id; }
-    else { (ok1 ? $("employeeId") : $("fullName")).focus(); }
-    return ok1 && ok2;
+  /* ---------------- chrome: stamps, progress, buttons ---------------- */
+  function chrome() {
+    var s = STEPS[state.step], inPP = s.kind !== "welcome" && s.kind !== "done";
+    $("passport").hidden = !inPP;
+    $("actions").hidden = s.kind === "done";
+    $("backBtn").hidden = state.step === 0 || s.kind === "done" || s.kind === "power";
+    if (inPP) {
+      var cur = s.si != null ? s.si : STAGES.length;
+      $("ppLabel").textContent = s.kind === "prize" ? "Prize desk" : "Booth passport";
+      $("ppStep").textContent = s.kind === "prize" ? "Final step" : "Station " + (cur + 1) + " of " + STAGES.length;
+      $("barFill").style.width = Math.round(state.step / LAST * 100) + "%";
+      STAGES.forEach(function (st, i) {
+        var li = $("st-" + i);
+        li.classList.toggle("done", stageDone(i));
+        li.classList.toggle("current", i === cur);
+      });
+    }
+    updatePrimary();
   }
 
-  function validateText(q) {
-    var v = $("t-" + q.id).value.trim();
-    state.answers[q.id] = v;
-    var ok = setErr("t-" + q.id, "e-" + q.id, v.length < q.min ? "Please write a little more (at least " + q.min + " characters)." : "");
-    if (!ok) $("t-" + q.id).focus();
-    return ok;
+  function updatePrimary() {
+    var b = $("nextBtn"), s = STEPS[state.step];
+    b.disabled = false; b.hidden = false;
+    switch (s.kind) {
+      case "welcome": b.textContent = "Start"; break;
+      case "gate": b.textContent = STAGES[s.si].gate.btn; break;
+      case "mcq":
+        var m = state.mcq[s.q.id];
+        if (m && m.ok) b.textContent = s.qi + 1 < s.of ? "Next question" : "Next";
+        else { b.textContent = m && m.wrong.length ? "Try again" : "Check answer"; b.disabled = !mount.querySelector("#opts input:checked"); }
+        break;
+      case "text": b.textContent = "Next"; break;
+      case "power":
+        b.textContent = "Next station"; b.hidden = state.power.length < POWER_STAGE.power.length; break;
+      case "prize": b.textContent = "Submit"; break;
+    }
   }
 
-  function checkMcq(q) {
-    var pick = state.answers[q.id];
-    if (pick == null) { $("e-" + q.id).textContent = "Please choose an answer."; return; }
-    $("e-" + q.id).textContent = "";
-    state.checked[q.id] = true;
-    paintMcq(q);
-    save();
-    renderChrome();
-  }
+  function go(step, backwards) { state.step = step; save(); render(backwards); window.scrollTo({ top: 0, behavior: "smooth" }); }
 
-  function paintMcq(q) {
-    var box = $("o-" + q.id), fb = $("f-" + q.id);
-    var pick = state.answers[q.id];
-    box.querySelectorAll("input").forEach(function (r) { r.checked = String(pick) === r.value; });
-    if (!state.checked[q.id]) return;
-    box.classList.add("locked");
-    box.querySelectorAll("input").forEach(function (r) { r.disabled = true; });
-    box.querySelectorAll(".opt").forEach(function (o) {
-      var k = +o.getAttribute("data-k");
-      o.classList.toggle("correct", k === q.correct);
-      o.classList.toggle("wrong", k === pick && k !== q.correct);
-    });
-    var right = pick === q.correct;
-    fb.className = "feedback " + (right ? "ok" : "bad");
-    fb.innerHTML = right
-      ? "<span>✔</span><div><b>Correct!</b>Booth stamped. Well done.</div>"
-      : "<span>✖</span><div><b>Not quite.</b>The correct answer is " + LETTERS[q.correct] + ". Your booth is still stamped.</div>";
-    fb.hidden = false;
-  }
-
-  function validatePrize() {
-    var opt = sel.options[sel.selectedIndex];
-    var ok = setErr("prize", "prizeErr", !sel.value ? "Please select the prize you won." : "");
-    if (ok) { state.prize = sel.value; state.prizeCategory = opt.getAttribute("data-cat") || ""; }
-    return ok;
-  }
-
-  /* ------------------------------------------------------------------
-     EVENTS
-     ------------------------------------------------------------------ */
+  /* ---------------- primary button ---------------- */
   $("nextBtn").addEventListener("click", function () {
-    var st = state.step;
-    if (st === 0) { if (validateWelcome()) show(1); return; }
-    if (st <= QUESTIONS.length) {
-      var q = QUESTIONS[st - 1];
-      if (q.type === "text") { if (validateText(q)) show(st + 1); }
-      else if (!state.checked[q.id]) { checkMcq(q); }
-      else { show(st + 1); }
-      if (st + 1 === QUESTIONS.length + 1) renderReview();
+    var s = STEPS[state.step];
+    if (s.kind === "welcome") {
+      var name = $("fullName").value.trim().replace(/\s+/g, " "), id = $("employeeId").value.trim().toUpperCase();
+      var ok1 = setErr("fullName", "fullNameErr", name.length < 3 ? "Please enter your full name." : name.split(" ").length < 2 ? "Please enter your first and last name." : "");
+      var ok2 = setErr("employeeId", "employeeIdErr", !id ? "Please enter your Employee ID." : !/^[A-Z0-9-]{3,20}$/.test(id) ? "Use 3–20 letters or numbers only." : "");
+      if (ok1 && ok2) { state.fullName = name; state.employeeId = id; go(state.step + 1); }
+      else (ok1 ? $("employeeId") : $("fullName")).focus();
       return;
     }
-    if (st === QUESTIONS.length + 1) { if (validatePrize()) submit(); }
+    if (s.kind === "gate") { state.gates[STAGES[s.si].id] = new Date().toISOString(); go(state.step + 1); return; }
+    if (s.kind === "mcq") {
+      var q = s.q, m = state.mcq[q.id] || (state.mcq[q.id] = { wrong: [], ok: false });
+      if (m.ok) { go(state.step + 1); return; }
+      var pick = mount.querySelector("#opts input:checked");
+      if (!pick) { $("qerr").textContent = "Please choose an answer."; return; }
+      var k = +pick.value;
+      if (k === q.correct) { m.ok = true; save(); render(); }
+      else {
+        if (m.wrong.indexOf(k) === -1) m.wrong.push(k);
+        save(); render();
+        $("fb").innerHTML = '<div class="feedback bad"><span>✖</span><div><b>Not quite.</b>Have another look and try again.</div></div>';
+        $("opts").classList.add("shake");
+      }
+      return;
+    }
+    if (s.kind === "text") {
+      var v = $("ta").value.trim(); state.text[s.q.id] = v;
+      if (setErr("ta", "qerr", v.length < s.q.min ? "Please write a little more (at least " + s.q.min + " characters)." : "")) go(state.step + 1);
+      else $("ta").focus();
+      return;
+    }
+    if (s.kind === "power") { go(state.step + 1); return; }
+    if (s.kind === "prize") {
+      if (!setErr("prize", "prizeErr", state.prize ? "" : "Please select the prize you won.")) return;
+      submit();
+    }
   });
 
   $("backBtn").addEventListener("click", function () {
-    if (state.step > 0) {
-      var st = state.step;
-      if (st <= QUESTIONS.length) {
-        var q = QUESTIONS[st - 1];
-        if (q.type === "text") state.answers[q.id] = $("t-" + q.id).value.trim();
-      }
-      show(st - 1, true);
-    }
+    var s = STEPS[state.step];
+    if (s.kind === "text") state.text[s.q.id] = $("ta").value;
+    if (state.step > 0) go(state.step - 1, true);
   });
 
-  QUESTIONS.forEach(function (q) {
-    if (q.type === "text") {
-      var t = $("t-" + q.id), c = $("c-" + q.id);
-      t.addEventListener("input", function () {
-        c.textContent = t.value.length + " / 1000";
-        state.answers[q.id] = t.value;
-        if (t.value.trim().length >= q.min) setErr("t-" + q.id, "e-" + q.id, "");
-        save();
-      });
-    } else {
-      $("o-" + q.id).addEventListener("change", function (ev) {
-        if (state.checked[q.id]) return;
-        state.answers[q.id] = +ev.target.value;
-        $("e-" + q.id).textContent = "";
-        save();
-        updatePrimary();
-      });
-    }
-  });
-
-  ["fullName", "employeeId"].forEach(function (id) {
-    $(id).addEventListener("input", function () { setErr(id, id + "Err", ""); });
-    $(id).addEventListener("keydown", function (e) { if (e.key === "Enter") $("nextBtn").click(); });
-  });
-
-  sel.addEventListener("change", function () {
-    validatePrize();
-    var opt = sel.options[sel.selectedIndex];
-    $("prizeCat").textContent = opt.getAttribute("data-cat") || "";
-    $("prizeName").textContent = sel.value;
-    $("prizeBox").hidden = !sel.value;
-    save();
-  });
-
-  /* ------------------------------------------------------------------
-     REVIEW + SUBMIT
-     ------------------------------------------------------------------ */
-  function score() {
-    return QUESTIONS.filter(function (q) { return q.type === "mcq" && state.answers[q.id] === q.correct; }).length;
+  /* ---------------- scoring + payload ---------------- */
+  function mcqsOf(stageId) {
+    var a = [];
+    STAGES.forEach(function (st) { if (!stageId || st.id === stageId) (st.questions || []).forEach(function (q) { if (q.type === "mcq") a.push(q); }); });
+    return a;
   }
-  function mcqTotal() { return QUESTIONS.filter(function (q) { return q.type === "mcq"; }).length; }
-
-  function renderReview() {
-    $("review").innerHTML =
-      "<li><span>Name</span><span>" + esc(state.fullName) + "</span></li>" +
-      "<li><span>Employee ID</span><span>" + esc(state.employeeId) + "</span></li>" +
-      "<li><span>Booths stamped</span><span>" + QUESTIONS.length + " / " + QUESTIONS.length + "</span></li>" +
-      "<li><span>Quiz score</span><span>" + score() + " / " + mcqTotal() + "</span></li>";
+  function firstTry(stageId) {
+    var qs = mcqsOf(stageId);
+    return [qs.filter(function (q) { var m = state.mcq[q.id]; return m && m.ok && m.wrong.length === 0; }).length, qs.length];
   }
+  function wrongTries() { return mcqsOf().reduce(function (a, q) { return a + ((state.mcq[q.id] || {}).wrong || []).length; }, 0); }
+  function yn(qid) { var m = state.mcq[qid]; return m && m.ok && !m.wrong.length ? "Yes" : "No"; }
 
   function buildPayload() {
-    var p = {
-      submissionId: state.submissionId,
-      event: CFG.EVENT || "",
-      submittedAt: new Date().toISOString(),
-      startedAt: state.startedAt,
-      fullName: state.fullName,
-      employeeId: state.employeeId,
-      prize: state.prize,
-      prizeCategory: state.prizeCategory,
-      score: score() + "/" + mcqTotal(),
-      device: navigator.userAgent.slice(0, 180)
+    var c = firstTry("connect"), k = firstTry("care"), t = firstTry();
+    return {
+      submissionId: state.submissionId, event: CFG.EVENT || "", startedAt: state.startedAt,
+      durationMin: Math.max(1, Math.round((Date.now() - new Date(state.startedAt).getTime()) / 60000)),
+      fullName: state.fullName, employeeId: state.employeeId,
+      connect_score: c[0] + "/" + c[1],
+      power_result: powerTitle(),
+      power_answers: state.power.map(function (k, i) { return POWER_STAGE.power[i].options[k][0]; }).join(" | "),
+      empower_text: (state.text.empower || "").trim(),
+      inspire_first: yn("inspire"), hawa_first: yn("hawa"),
+      care_score: k[0] + "/" + k[1],
+      experience_text: (state.text.experience || "").trim(),
+      first_try_score: t[0] + "/" + t[1], wrong_tries: wrongTries(),
+      prizeCategory: state.prizeCategory, prize: state.prize,
+      ref: state.ref, device: navigator.userAgent.slice(0, 180)
     };
-    QUESTIONS.forEach(function (q, i) {
-      var n = "q" + (i + 1) + "_" + q.id;
-      if (q.type === "text") p[n] = (state.answers[q.id] || "").trim();
-      else {
-        var k = state.answers[q.id];
-        p[n] = k == null ? "" : LETTERS[k] + ") " + q.options[k];
-        p[n + "_correct"] = k === q.correct ? "Yes" : "No";
-      }
-    });
-    return p;
   }
 
   function send(payload) {
     if (!CFG.ENDPOINT) return new Promise(function (r) { setTimeout(function () { r({ ok: true, demo: true }); }, 700); });
     var body = JSON.stringify(payload);
-    // Plain-text body = "simple" request, so the browser skips the CORS preflight Apps Script can't answer.
     return fetch(CFG.ENDPOINT, { method: "POST", body: body, headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow" })
       .then(function (res) { return res.json(); })
-      .then(function (j) { if (!j || !j.ok) throw new Error((j && j.error) || "Server error"); return j; })
+      .then(function (j) { if (!j || !j.ok) { var e = new Error((j && j.error) || "Server error"); e.fromServer = true; throw e; } return j; })
       .catch(function (err) {
-        if (err && /Server error|Duplicate|Invalid/.test(err.message)) throw err;
-        // Some corporate browsers block reading the redirect; fire-and-forget fallback.
-        // The server ignores repeats of the same submissionId, so this is safe.
+        if (err && err.fromServer) throw err;
+        // Some networks block reading Apps Script's redirect: send anyway. The server ignores repeats of the same submissionId.
         return fetch(CFG.ENDPOINT, { method: "POST", body: body, mode: "no-cors" }).then(function () { return { ok: true, unverified: true }; });
       });
   }
-
-  function queue(payload) {
-    try {
-      var box = JSON.parse(localStorage.getItem(OUTBOX_KEY) || "[]");
-      if (!box.some(function (p) { return p.submissionId === payload.submissionId; })) box.push(payload);
-      localStorage.setItem(OUTBOX_KEY, JSON.stringify(box));
-    } catch (e) {}
-  }
+  function queue(p) { try { var b = JSON.parse(localStorage.getItem(OUTBOX_KEY) || "[]"); if (!b.some(function (x) { return x.submissionId === p.submissionId; })) b.push(p); localStorage.setItem(OUTBOX_KEY, JSON.stringify(b)); } catch (e) {} }
   function flushOutbox() {
-    if (!CFG.ENDPOINT) return;
-    var box; try { box = JSON.parse(localStorage.getItem(OUTBOX_KEY) || "[]"); } catch (e) { return; }
-    if (!box.length) return;
-    var p = box[0];
-    send(p).then(function () {
-      box.shift(); try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(box)); } catch (e) {}
-      flushOutbox();
-    }).catch(function () {});
+    if (!CFG.ENDPOINT) return; var b; try { b = JSON.parse(localStorage.getItem(OUTBOX_KEY) || "[]"); } catch (e) { return; }
+    if (!b.length) return;
+    send(b[0]).then(function () { b.shift(); try { localStorage.setItem(OUTBOX_KEY, JSON.stringify(b)); } catch (e) {} flushOutbox(); }).catch(function () {});
   }
 
   function submit() {
@@ -658,35 +614,22 @@ input:focus, textarea:focus, select:focus{outline:none; border-color:var(--plum)
     btn.disabled = true; back.disabled = true;
     btn.innerHTML = '<span class="spinner" aria-hidden="true"></span>Submitting…';
     $("submitErr").textContent = "";
+    if (!state.ref) state.ref = state.submissionId.replace(/[^a-z0-9]/gi, "").slice(0, 6).toUpperCase();
     var payload = buildPayload();
     send(payload).then(function (res) {
-      try { localStorage.setItem("hawa-passport-done", JSON.stringify({ id: state.employeeId, ref: state.submissionId })); } catch (e) {}
-      clearDraft();
-      $("refLine").textContent = "Reference: " + state.submissionId.slice(0, 8).toUpperCase();
-      $("demoNote").hidden = !res.demo;
-      show(screens.length - 1);
-    }).catch(function () {
-      queue(payload);
-      btn.disabled = false; back.disabled = false;
-      btn.textContent = "Try again";
-      $("submitErr").textContent = "We couldn't reach the server. Check your connection and tap Try again. Your answers are kept on this phone.";
+      state.demo = !!res.demo; go(LAST);
+    }).catch(function (err) {
+      queue(payload); btn.disabled = false; back.disabled = false; btn.textContent = "Try again";
+      $("submitErr").textContent = err && err.fromServer
+        ? "The server reported a problem (" + err.message + "). Please tell the HAWA desk. Your answers are kept on this phone."
+        : "We couldn't reach the server. Check your connection and tap Try again. Your answers are kept on this phone.";
     });
   }
 
-  /* ------------------------------------------------------------------
-     INIT — restore a draft if the page was refreshed mid-way
-     ------------------------------------------------------------------ */
+  /* ---------------- init ---------------- */
   load();
-  $("fullName").value = state.fullName || "";
-  $("employeeId").value = state.employeeId || "";
-  QUESTIONS.forEach(function (q) {
-    if (q.type === "text") {
-      var t = $("t-" + q.id); t.value = state.answers[q.id] || ""; $("c-" + q.id).textContent = t.value.length + " / 1000";
-    } else paintMcq(q);
-  });
-  if (state.prize) { sel.value = state.prize; sel.dispatchEvent(new Event("change")); }
-  if (state.step >= QUESTIONS.length + 1) renderReview();
-  show(Math.min(state.step || 0, QUESTIONS.length + 1));
+  if (!(state.step >= 0 && state.step <= LAST)) state.step = 0;
+  render();
   flushOutbox();
   window.addEventListener("online", flushOutbox);
 })();
