@@ -1,53 +1,181 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>قيد التطوير | يوم المرأة العمانية</title>
+<title>رحلة يوم المرأة العُمانية | PDO HAWA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
 <style>
 :root{
   --lilac:#bdaed6; --lilac-deep:#9d86c6; --mint:#6dbd8c; --plum:#612c90;
   --ink:#2c1747; --paper:#ffffff; --muted:#6f6385; --ribbon:#4fae78;
+  --error:#d9385a; --error-bg:#fdf2f4; --success:#2e8555; --success-bg:#edf9f2;
   --display:"Reem Kufi","IBM Plex Sans Arabic",Tahoma,sans-serif;
   --body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif;
 }
 *{box-sizing:border-box}
-html,body{height:100%;margin:0}
+html,body{min-height:100%;margin:0}
 body{
   font-family:var(--body); color:var(--ink); background:var(--lilac);
   background-image:radial-gradient(ellipse 60% 62% at 50% 50%, var(--mint) 0%, #8cb6a6 38%, #a9b0c9 66%, var(--lilac) 100%);
+  background-attachment:fixed;
 }
 .stage{
-  position:relative; min-height:100%; display:grid; place-items:center; overflow:hidden; isolation:isolate;
-  padding-block:24px;
+  position:relative; min-height:100vh; display:grid; place-items:center; overflow-x:hidden; isolation:isolate;
+  padding-block:32px;
   padding-left:max(16px, env(safe-area-inset-left, 0px));
   padding-right:max(16px, env(safe-area-inset-right, 0px));
 }
-.frame{position:absolute; inset:0; z-index:-1; pointer-events:none; background:url("../assets/frame.webp") center/100% 100% no-repeat; opacity:.95}
-.logos{position:absolute; top:calc(env(safe-area-inset-top,0px) + 20px); right:max(20px, env(safe-area-inset-right,0px)); width:clamp(150px,20vw,280px)}
+.frame{position:fixed; inset:0; z-index:-1; pointer-events:none; background:url("../assets/frame.webp") center/100% 100% no-repeat; opacity:.95}
+.logos{position:absolute; top:calc(env(safe-area-inset-top,0px) + 18px); right:max(20px, env(safe-area-inset-right,0px)); width:clamp(140px,20vw,260px); z-index:2}
 .logos img{display:block; width:100%; height:auto}
 
 .card{
-  width:100%; max-width:520px; background:var(--paper); border-radius:28px;
-  padding:clamp(28px,5vw,44px) clamp(22px,4vw,40px); text-align:center;
+  width:100%; max-width:560px; background:var(--paper); border-radius:28px;
+  padding:clamp(24px,4.5vw,38px) clamp(20px,4vw,36px); text-align:center;
   box-shadow:0 0 0 8px var(--plum), 0 0 0 13px var(--lilac), 0 24px 60px rgba(50,20,90,.35);
-  display:flex; flex-direction:column; align-items:center; gap:16px; margin-top:60px;
+  display:flex; flex-direction:column; align-items:center; gap:14px; margin-top:68px; margin-bottom:24px;
+  position:relative; transition:all .3s ease;
 }
-.bloom{width:110px; height:110px; position:relative}
+
+/* Top Bar inside Card */
+.card-top{
+  width:100%; display:flex; justify-content:space-between; align-items:center; gap:8px;
+}
+.lang-btn{
+  background:#efe9f7; color:var(--plum); border:1.5px solid var(--lilac-deep);
+  padding:5px 12px; border-radius:999px; font-family:var(--body); font-size:12.5px;
+  font-weight:600; cursor:pointer; transition:.2s;
+}
+.lang-btn:hover{background:var(--plum); color:#fff}
+
+.bloom{width:84px; height:84px; position:relative; margin-top:-6px}
 .bloom img{width:100%; height:100%; object-fit:contain; animation:grow 3.2s ease-in-out infinite}
-.badge{font-size:13px; font-weight:600; letter-spacing:.04em; color:var(--plum); background:#efe9f7; padding:5px 14px; border-radius:999px}
-h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(30px,5vw,42px); color:var(--plum); line-height:1.2; text-wrap:balance}
-p{margin:0; color:var(--muted); font-size:clamp(15px,2.2vw,18px); line-height:1.8; max-width:36ch}
-.bar{width:100%; max-width:280px; height:10px; background:#efe9f7; border-radius:999px; overflow:hidden}
-.bar span{display:block; height:100%; width:40%; border-radius:999px; background:linear-gradient(90deg,var(--lilac-deep),var(--mint)); animation:load 2.4s ease-in-out infinite}
-.ribbon{margin-top:6px; font-family:var(--display); font-weight:600; font-size:clamp(17px,2.4vw,22px); color:var(--ribbon); padding:.2em 1.3em .3em; border-radius:999px; box-shadow:0 0 0 5px var(--plum)}
+.badge{font-size:13px; font-weight:600; letter-spacing:.02em; color:var(--plum); background:#efe9f7; padding:5px 14px; border-radius:999px}
+
+h1{margin:0; font-family:var(--display); font-weight:700; font-size:clamp(24px,4.2vw,34px); color:var(--plum); line-height:1.3; text-wrap:balance}
+.subtitle{margin:0; color:var(--muted); font-size:clamp(14px,2vw,16px); line-height:1.65; max-width:44ch}
+
+/* Progress Bar */
+.progress-wrap{width:100%; max-width:340px; display:flex; flex-direction:column; gap:6px; align-items:center}
+.bar{width:100%; height:10px; background:#efe9f7; border-radius:999px; overflow:hidden}
+.bar span{display:block; height:100%; width:14%; border-radius:999px; background:linear-gradient(90deg,var(--lilac-deep),var(--mint)); transition:width .4s cubic-bezier(.4,0,.2,1)}
+.step-counter{font-size:12px; color:var(--muted); font-weight:600}
+
+/* Step Container */
+.step-view{width:100%; display:none; flex-direction:column; gap:14px; text-align:start; animation:fadeIn .35s ease}
+.step-view.active{display:flex}
+
+@keyframes fadeIn{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:translateY(0)}}
+
+/* Form Controls */
+.field-group{display:flex; flex-direction:column; gap:6px; width:100%}
+.field-label{font-size:14px; font-weight:600; color:var(--plum)}
+.input-box, .textarea-box, .select-box{
+  width:100%; padding:13px 15px; border-radius:14px; border:2px solid #e2d9f3;
+  font-family:var(--body); font-size:15px; color:var(--ink); background:#fbf9ff;
+  transition:border-color .2s, box-shadow .2s; outline:none;
+}
+.input-box:focus, .textarea-box:focus, .select-box:focus{
+  border-color:var(--plum); background:#fff; box-shadow:0 0 0 4px rgba(97,44,144,.12);
+}
+.textarea-box{min-height:110px; resize:vertical; line-height:1.6}
+
+/* Question Box */
+.q-box{
+  background:#f8f5fc; border:1.5px solid #e7dff5; border-radius:18px; padding:16px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.q-en{font-size:15.5px; font-weight:700; color:var(--ink); line-height:1.5; direction:ltr; text-align:left}
+.q-ar{font-size:14.5px; font-weight:500; color:var(--muted); line-height:1.65; direction:rtl; text-align:right; border-top:1px dashed #dcd0f0; padding-top:8px}
+
+/* Multiple Choice Options */
+.options-list{display:flex; flex-direction:column; gap:10px; width:100%}
+.option-btn{
+  width:100%; text-align:left; direction:ltr; padding:13px 16px; border-radius:14px;
+  border:2px solid #e2d9f3; background:#fff; color:var(--ink); font-family:var(--body);
+  font-size:14.5px; font-weight:500; line-height:1.45; cursor:pointer;
+  display:flex; align-items:flex-start; gap:10px; transition:all .2s ease;
+}
+html[dir="rtl"] .option-btn.rtl-opt{direction:rtl; text-align:right}
+.option-btn:hover{border-color:var(--lilac-deep); background:#faf7ff}
+.option-btn.selected{border-color:var(--plum); background:#f3ecfc; font-weight:600}
+.option-btn.correct{border-color:var(--success); background:var(--success-bg); color:#1b5233; font-weight:600}
+.option-btn.wrong{border-color:var(--error); background:var(--error-bg); color:#8c1d35}
+.opt-letter{
+  min-width:26px; height:26px; border-radius:50%; background:#efe9f7; color:var(--plum);
+  display:inline-grid; place-items:center; font-weight:700; font-size:13px; flex-shrink:0;
+}
+.option-btn.correct .opt-letter{background:var(--success); color:#fff}
+.option-btn.wrong .opt-letter{background:var(--error); color:#fff}
+
+/* Feedback Alert */
+.feedback{
+  display:none; padding:12px 15px; border-radius:14px; font-size:13.5px; line-height:1.6; font-weight:500;
+}
+.feedback.show{display:block; animation:fadeIn .25s ease}
+.feedback.ok{background:var(--success-bg); color:#1c5636; border:1.5px solid #a3e0be}
+.feedback.err{background:var(--error-bg); color:#961f38; border:1.5px solid #f3b5c1}
+
+/* Navigation Buttons */
+.nav-row{display:flex; gap:10px; width:100%; margin-top:4px}
+.btn-primary{
+  flex:1; padding:14px 20px; border:none; border-radius:999px;
+  background:linear-gradient(135deg, var(--plum), #7c3cb5); color:#fff;
+  font-family:var(--body); font-size:16px; font-weight:700; cursor:pointer;
+  box-shadow:0 8px 20px rgba(97,44,144,.28); transition:transform .15s, opacity .2s;
+}
+.btn-primary:hover{transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary:disabled{opacity:.5; cursor:not-allowed; transform:none}
+.btn-secondary{
+  padding:14px 18px; border:2px solid #e2d9f3; border-radius:999px;
+  background:#fff; color:var(--plum); font-family:var(--body); font-size:14.5px;
+  font-weight:600; cursor:pointer; transition:.2s;
+}
+.btn-secondary:hover{background:#f5f0fc}
+
+/* Final Receipt / Verification Card */
+.pass-card{
+  background:linear-gradient(180deg, #f4fbf7 0%, #ffffff 100%);
+  border:2px solid var(--mint); border-radius:20px; padding:20px 18px;
+  text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.pass-icon{
+  width:56px; height:56px; border-radius:50%; background:var(--mint); color:#fff;
+  display:grid; place-items:center; font-size:28px; font-weight:700;
+  box-shadow:0 6px 16px rgba(79,174,120,.35);
+}
+.pass-details{
+  width:100%; background:#f8f5fc; border-radius:14px; padding:12px 14px;
+  display:flex; flex-direction:column; gap:8px; font-size:14px; text-align:start;
+}
+.pass-row{display:flex; justify-content:space-between; gap:8px; border-bottom:1px dashed #e2d9f3; padding-bottom:6px}
+.pass-row:last-child{border-bottom:none; padding-bottom:0}
+.pass-label{color:var(--muted); font-weight:500}
+.pass-val{color:var(--plum); font-weight:700}
+
+.ribbon{
+  margin-top:6px; font-family:var(--display); font-weight:600; font-size:clamp(16px,2.2vw,20px);
+  color:var(--ribbon); padding:.2em 1.3em .3em; border-radius:999px;
+  box-shadow:0 0 0 4px var(--plum); cursor:pointer; user-select:none;
+}
+
+/* Admin Modal */
+.admin-modal{
+  position:fixed; inset:0; background:rgba(30,12,54,.65); z-index:99;
+  display:none; place-items:center; padding:16px;
+}
+.admin-modal.open{display:grid}
+.admin-box{
+  background:#fff; width:100%; max-width:440px; border-radius:22px; padding:24px;
+  box-shadow:0 20px 50px rgba(0,0,0,.35); text-align:center; display:flex; flex-direction:column; gap:12px;
+}
 
 @keyframes grow{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.07) rotate(4deg)}}
-@keyframes load{0%{transform:translateX(160%)}100%{transform:translateX(-260%)}}
-@media (prefers-reduced-motion:reduce){.bloom img,.bar span{animation:none}}
+@media (prefers-reduced-motion:reduce){.bloom img{animation:none}}
 @media (max-width:640px){
   .frame{background-size:cover; opacity:.6}
   .logos{right:auto; left:50%; translate:-50% 0}
@@ -60,13 +188,539 @@ p{margin:0; color:var(--muted); font-size:clamp(15px,2.2vw,18px); line-height:1.
   <div class="logos"><img src="../assets/logos.webp" alt="لِعُمان For Oman"></div>
 
   <section class="card">
+    <div class="card-top">
+      <span class="badge" id="boothBadge">PDO – HAWA Event</span>
+      <button type="button" class="lang-btn" id="langToggle" onclick="toggleLanguage()">English / عربي</button>
+    </div>
+
     <div class="bloom"><img src="../assets/lily-b.webp" alt="" aria-hidden="true"></div>
-    <span class="badge">قيد التطوير</span>
-    <h1>نُجهّز لكِ شيئاً جميلاً</h1>
-    <p>هذه الصفحة قيد التطوير حالياً، وستكون متاحة قريباً بمناسبة يوم المرأة العُمانية.</p>
-    <div class="bar" aria-hidden="true"><span></span></div>
-    <p class="ribbon">بها يزدهر الوطن</p>
+
+    <h1 id="mainTitle">رحلة يوم المرأة العُمانية</h1>
+    <p class="subtitle" id="mainSubtitle">أبقِ هذه الصفحة مفتوحة طوال جولتك في الأركان للإجابة على الأسئلة وتوثيق جائزتك.</p>
+
+    <div class="progress-wrap">
+      <div class="bar" aria-hidden="true"><span id="progressBar"></span></div>
+      <span class="step-counter" id="stepCounter">الخطوة 1 من 7</span>
+    </div>
+
+    <!-- STEP 1: Identification -->
+    <div class="step-view active" id="step-1">
+      <div class="field-group">
+        <label class="field-label" for="fullName" data-ar="الاسم الكامل (Full Name) *" data-en="Full Name *">الاسم الكامل (Full Name) *</label>
+        <input type="text" id="fullName" class="input-box" placeholder="أدخل اسمك الكامل / Enter your full name" autocomplete="name">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="empId" data-ar="الرقم الوظيفي / البطاقة (Staff ID) *" data-en="Employee / Staff ID *">الرقم الوظيفي / البطاقة (Staff ID) *</label>
+        <input type="text" id="empId" class="input-box" placeholder="مثال: 12345 / e.g. 12345">
+      </div>
+      <div class="feedback err" id="err-1">يرجى إدخال الاسم الكامل والرقم الوظيفي للمتابعة. / Please enter both your Name and ID.</div>
+      <div class="nav-row">
+        <button type="button" class="btn-primary" onclick="nextFromLogin()" data-ar="ابدأ الرحلة ←" data-en="Start Journey →">ابدأ الرحلة ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Booth 1 - Empower -->
+    <div class="step-view" id="step-2">
+      <div class="q-box">
+        <div class="q-en"><strong>Empower Booth:</strong> If you could introduce one new initiative to further empower women at PDO what would it be?</div>
+        <div class="q-ar"><strong>ركن التمكين (Empower):</strong> لو كان بإمكانك تقديم مبادرة جديدة لتمكين المرأة في شركة تنمية نفط عُمان (PDO)، فما هي؟</div>
+      </div>
+      <div class="field-group">
+        <textarea id="ansEmpower" class="textarea-box" placeholder="اكتبي إجابتك أو مقترحك هنا... / Write your initiative idea here..."></textarea>
+      </div>
+      <div class="feedback err" id="err-2">يرجى كتابة إجابتك قبل الانتقال للمرحلة التالية. / Please write your answer before proceeding.</div>
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" onclick="goToStep(1)" data-ar="السابق" data-en="Back">السابق</button>
+        <button type="button" class="btn-primary" onclick="nextFromOpen(2, 'ansEmpower')" data-ar="التالي ←" data-en="Next →">التالي ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Booth 2 - Inspire -->
+    <div class="step-view" id="step-3">
+      <div class="q-box">
+        <div class="q-en"><strong>Inspire Booth:</strong> Why is early intervention important for children with disabilities?</div>
+        <div class="q-ar"><strong>ركن الإلهام (Inspire):</strong> لماذا يُعد التدخل المبكر مهماً للأطفال ذوي الإعاقة؟</div>
+      </div>
+      <div class="options-list" id="opts-3">
+        <button type="button" class="option-btn" onclick="checkMCQ(3, 'A', this)">
+          <span class="opt-letter">A</span>
+          <span>It supports children's development, builds essential skills, and helps them reach their full potential.</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(3, 'B', this)">
+          <span class="opt-letter">B</span>
+          <span>It is only needed when children start school.</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(3, 'C', this)">
+          <span class="opt-letter">C</span>
+          <span>It focuses only on a child's difficulties rather than their abilities.</span>
+        </button>
+      </div>
+      <div class="feedback" id="fb-3"></div>
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" onclick="goToStep(2)" data-ar="السابق" data-en="Back">السابق</button>
+        <button type="button" class="btn-primary" id="next-3" onclick="goToStep(4)" disabled data-ar="التالي ←" data-en="Next →">التالي ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Booth 3 - HAWA Logo -->
+    <div class="step-view" id="step-4">
+      <div class="q-box">
+        <div class="q-en"><strong>HAWA Logo Booth:</strong> What does HAWA help women at PDO do?</div>
+        <div class="q-ar"><strong>ركن شعار حواء (HAWA Logo):</strong> ما الذي تساعد به شبكة «حواء» النساء في شركة تنمية نفط عُمان؟</div>
+      </div>
+      <div class="options-list" id="opts-4">
+        <button type="button" class="option-btn" onclick="checkMCQ(4, 'A', this)">
+          <span class="opt-letter">A</span>
+          <span>Connect and support one another</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(4, 'B', this)">
+          <span class="opt-letter">B</span>
+          <span>Build confidence and leadership skills</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(4, 'C', this)">
+          <span class="opt-letter">C</span>
+          <span>Access development and wellbeing opportunities</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(4, 'D', this)">
+          <span class="opt-letter">D</span>
+          <span>All of the above / جميع ما ذكر أعلاه</span>
+        </button>
+      </div>
+      <div class="feedback" id="fb-4"></div>
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" onclick="goToStep(3)" data-ar="السابق" data-en="Back">السابق</button>
+        <button type="button" class="btn-primary" id="next-4" onclick="goToStep(5)" disabled data-ar="التالي ←" data-en="Next →">التالي ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Booth 4 - Care (Clinic) -->
+    <div class="step-view" id="step-5">
+      <div class="q-box">
+        <div class="q-en"><strong>Care (Clinic) Booth:</strong> Which health condition is often called the “silent killer” because it may have no noticeable symptoms?</div>
+        <div class="q-ar"><strong>ركن الرعاية والعيادة (Care):</strong> أي حالة صحية تُسمى غالباً «القاتل الصامت» لأنها قد لا تُظهر أعراضاً ملحوظة؟</div>
+      </div>
+      <div class="options-list" id="opts-5">
+        <button type="button" class="option-btn" onclick="checkMCQ(5, 'A', this)">
+          <span class="opt-letter">A</span>
+          <span>High blood pressure (ارتفاع ضغط الدم)</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(5, 'B', this)">
+          <span class="opt-letter">B</span>
+          <span>Seasonal allergies (الحساسية الموسمية)</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(5, 'C', this)">
+          <span class="opt-letter">C</span>
+          <span>Common cold (نزلات البرد)</span>
+        </button>
+        <button type="button" class="option-btn" onclick="checkMCQ(5, 'D', this)">
+          <span class="opt-letter">D</span>
+          <span>Acid reflux (ارتجاع المريء)</span>
+        </button>
+      </div>
+      <div class="feedback" id="fb-5"></div>
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" onclick="goToStep(4)" data-ar="السابق" data-en="Back">السابق</button>
+        <button type="button" class="btn-primary" id="next-5" onclick="goToStep(6)" disabled data-ar="التالي ←" data-en="Next →">التالي ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 6: Overall Experience -->
+    <div class="step-view" id="step-6">
+      <div class="q-box">
+        <div class="q-en"><strong>Overall Experience:</strong> What inspired you most about Hawa this year, which activity did you enjoy most, and what would you love to see from Hawa next year?</div>
+        <div class="q-ar"><strong>التجربة العامة:</strong> ما أكثر ما ألهمك في فعالية «حواء» هذا العام، وما النشاط الذي استمتعتِ به أكثر، وماذا تودين رؤيته العام القادم؟</div>
+      </div>
+      <div class="field-group">
+        <textarea id="ansOverall" class="textarea-box" placeholder="شاركي انطباعك وتطلعاتك هنا... / Share your feedback and thoughts here..."></textarea>
+      </div>
+      <div class="feedback err" id="err-6">يرجى مشاركة رأيك قبل الانتقال إلى مرحلة عجلة الحظ. / Please share your feedback before moving to Spin the Wheel.</div>
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" onclick="goToStep(5)" data-ar="السابق" data-en="Back">السابق</button>
+        <button type="button" class="btn-primary" onclick="nextFromOpen(6, 'ansOverall')" data-ar="التوجه لعجلة الحظ ←" data-en="Go to Spin the Wheel →">التوجه لعجلة الحظ ←</button>
+      </div>
+    </div>
+
+    <!-- STEP 7: Spin the Wheel Prize Selection -->
+    <div class="step-view" id="step-7">
+      <div class="q-box">
+        <div class="q-en"><strong>Spin the Wheel:</strong> Please spin the wheel at the prize booth, then select the voucher/prize you won from the list below:</div>
+        <div class="q-ar"><strong>عجلة الحظ (Spin the Wheel):</strong> توجهي الآن لتدوير عجلة الحظ، ثم اختاري القسيمة/الجائزة التي ربحتِها من القائمة أدناه لتأكيد الاستلام:</div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="prizeSelect" data-ar="اختاري الجائزة (Select Your Prize) *" data-en="Select Your Prize Voucher *">اختاري الجائزة (Select Your Prize) *</label>
+        <select id="prizeSelect" class="select-box" dir="ltr">
+          <option value="">-- Choose Prize / اختاري القسيمة --</option>
+          <optgroup label="Beauty / Salon (التجميل والسبا)">
+            <option value="Beauty / Salon - Mermaid Center">Mermaid Center</option>
+            <option value="Beauty / Salon - Bahar Home Nail">Bahar Home Nail</option>
+            <option value="Beauty / Salon - Lebanon Flower Salon">Lebanon Flower Salon</option>
+            <option value="Beauty / Salon - Asia Spa">Asia Spa</option>
+            <option value="Beauty / Salon - Lime Spa">Lime Spa</option>
+            <option value="Beauty / Salon - Eithz Spa">Eithz Spa</option>
+            <option value="Beauty / Salon - Talha Salon for Fitness & Beauty">Talha Salon for Fitness & Beauty</option>
+            <option value="Beauty / Salon - Longevity">Longevity</option>
+            <option value="Beauty / Salon - Optimum Clinic">Optimum Clinic</option>
+          </optgroup>
+          <optgroup label="Restaurant / Café (المطاعم والمقاهي)">
+            <option value="Restaurant / Café - Laduree">Laduree</option>
+            <option value="Restaurant / Café - Silica Cafe">Silica Cafe</option>
+          </optgroup>
+          <optgroup label="Hotel (الفنادق)">
+            <option value="Hotel - Grand Hyatt Muscat">Grand Hyatt Muscat</option>
+          </optgroup>
+          <optgroup label="Hospital (المستشفيات والعيادات)">
+            <option value="Hospital - Badr Al Samaa Royal Hospital">Badr Al Samaa Royal Hospital</option>
+            <option value="Hospital - Burjeel Hospital Muscat">Burjeel Hospital Muscat</option>
+          </optgroup>
+          <optgroup label="Fitness (اللياقة البدنية)">
+            <option value="Fitness - One O One Gym">One O One Gym</option>
+            <option value="Fitness - Azer gym">Azer gym</option>
+          </optgroup>
+          <optgroup label="Flowers / Workshops (الزهور والديكور)">
+            <option value="Flowers / Workshops - Floward Business">Floward Business</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="feedback err" id="err-7">يرجى اختيار الجائزة التي حصلتِ عليها من القائمة. / Please select the prize you won from the list.</div>
+      <div class="nav-row">
+        <button type="button" class="btn-secondary" onclick="goToStep(6)" data-ar="السابق" data-en="Back">السابق</button>
+        <button type="button" class="btn-primary" id="submitBtn" onclick="submitSurvey()" data-ar="تأكيد وإرسال ✓" data-en="Submit & Verify ✓">تأكيد وإرسال ✓</button>
+      </div>
+    </div>
+
+    <!-- STEP 8: Completed / Verification Screen -->
+    <div class="step-view" id="step-8">
+      <div class="pass-card">
+        <div class="pass-icon">✓</div>
+        <h2 style="margin:0; color:var(--plum); font-size:21px" data-ar="تم توثيق مشاركتك بنجاح!" data-en="Participation Verified!">تم توثيق مشاركتك بنجاح!</h2>
+        <p style="margin:0; font-size:13.5px; color:var(--muted)" data-ar="أبرزي هذه الشاشة لمنظمي ركن عجلة الحظ لاستلام جائزتك." data-en="Show this screen at the Spin the Wheel desk to claim your voucher.">أبرزي هذه الشاشة لمنظمي ركن عجلة الحظ لاستلام جائزتك.</p>
+        <div class="pass-details">
+          <div class="pass-row">
+            <span class="pass-label" data-ar="الاسم:" data-en="Name:">الاسم:</span>
+            <span class="pass-val" id="summaryName">-</span>
+          </div>
+          <div class="pass-row">
+            <span class="pass-label" data-ar="الرقم الوظيفي:" data-en="Staff ID:">الرقم الوظيفي:</span>
+            <span class="pass-val" id="summaryId">-</span>
+          </div>
+          <div class="pass-row">
+            <span class="pass-label" data-ar="الجائزة:" data-en="Prize Won:">الجائزة:</span>
+            <span class="pass-val" id="summaryPrize" dir="ltr">-</span>
+          </div>
+          <div class="pass-row">
+            <span class="pass-label" data-ar="وقت التوثيق:" data-en="Timestamp:">وقت التوثيق:</span>
+            <span class="pass-val" id="summaryTime" dir="ltr">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="ribbon" id="ribbonTrigger" onclick="handleRibbonTap()">بها يزدهر الوطن</p>
   </section>
 </main>
+
+<!-- Hidden Admin Modal (5 taps on Ribbon) -->
+<div class="admin-modal" id="adminModal">
+  <div class="admin-box">
+    <h3 style="margin:0; color:var(--plum)">لوحة المنظمين | Admin Panel</h3>
+    <p style="font-size:13.5px; color:var(--muted); margin:0">عدد السجلات المحفوظة على هذا الجهاز: <strong id="localCount">0</strong></p>
+    <button type="button" class="btn-primary" onclick="exportToExcelCSV()">تحميل ملف Excel (CSV)</button>
+    <button type="button" class="btn-secondary" onclick="resetCurrentVisitor()">بدء زائر جديد (Reset Device)</button>
+    <button type="button" class="btn-secondary" onclick="closeAdmin()">إغلاق</button>
+  </div>
+</div>
+
+<script>
+/**
+ * ضع رابط Google Apps Script Web App هنا لحفظ جميع المشاركات من هواتف الزوار في ملف Excel/Google Sheet مركزي تلقائياً
+ */
+const GOOGLE_SCRIPT_URL = ""; 
+
+let currentLang = "ar";
+let currentStep = 1;
+const totalSteps = 7;
+
+const state = {
+  fullName: "",
+  empId: "",
+  ansEmpower: "",
+  ansInspire: "",
+  ansHawa: "",
+  ansCare: "",
+  ansOverall: "",
+  prize: "",
+  timestamp: ""
+};
+
+const stepMeta = {
+  1: { badge: "Step 1: Registration | التسجيل", arTitle: "مرحباً بكِ في فعالية حواء", enTitle: "Welcome to PDO HAWA Event" },
+  2: { badge: "Booth 1: Empower | ركن التمكين", arTitle: "ركن التمكين (Empower)", enTitle: "Empower Booth" },
+  3: { badge: "Booth 2: Inspire | ركن الإلهام", arTitle: "ركن الإلهام (Inspire)", enTitle: "Inspire Booth" },
+  4: { badge: "Booth 3: HAWA Logo | شعار حواء", arTitle: "ركن شعار حواء (HAWA)", enTitle: "HAWA Logo Booth" },
+  5: { badge: "Booth 4: Care Clinic | ركن الرعاية", arTitle: "ركن العيادة (Care)", enTitle: "Care (Clinic) Booth" },
+  6: { badge: "Overall Experience | التجربة العامة", arTitle: "انطباعك العام", enTitle: "Overall Experience" },
+  7: { badge: "Spin the Wheel | عجلة الحظ", arTitle: "توثيق جائزة عجلة الحظ", enTitle: "Spin the Wheel Prize" },
+  8: { badge: "Completed | مكتمل ✓", arTitle: "شكراً لمشاركتكِ!", enTitle: "Thank You for Participating!" }
+};
+
+const correctAnswers = {
+  3: {
+    ans: "A",
+    okAr: "إجابة صحيحة! ✅ يسلط هذا السؤال الضوء على رسالة جمعية التدخل المبكر (AEICD) وأهمية التدخل المبكر في مساعدة الأطفال على النمو والتعلم والازدهار.",
+    okEn: "Correct! ✅ This question highlights AEICD’s mission and the importance of early intervention in helping children develop, learn, and thrive.",
+    errAr: "إجابة غير صحيحة، حاولي مرة أخرى لاجتياز ركن الإلهام.",
+    errEn: "Incorrect answer. Please try again to verify this booth."
+  },
+  4: {
+    ans: "D",
+    okAr: "إجابة صحيحة! ✅ شبكة حواء تدعم المرأة في جميع هذه الجوانب.",
+    okEn: "Correct! ✅ HAWA supports women at PDO across all of these pillars.",
+    errAr: "إجابة غير مكتملة، حاولي مرة أخرى!",
+    errEn: "Not quite right, please try again!"
+  },
+  5: {
+    ans: "A",
+    okAr: "إجابة صحيحة! ✅ ارتفاع ضغط الدم يُعرف بالقاتل الصامت لعدم وجود أعراض واضحة غالباً.",
+    okEn: "Correct! ✅ High blood pressure is known as the 'silent killer'.",
+    errAr: "إجابة غير صحيحة، حاولي مرة أخرى!",
+    errEn: "Incorrect answer, please try again!"
+  }
+};
+
+// Restore saved progress on page load
+window.addEventListener("DOMContentLoaded", () => {
+  const saved = localStorage.getItem("pdo_hawa_current_state");
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      Object.assign(state, parsed.state || {});
+      document.getElementById("fullName").value = state.fullName || "";
+      document.getElementById("empId").value = state.empId || "";
+      document.getElementById("ansEmpower").value = state.ansEmpower || "";
+      document.getElementById("ansOverall").value = state.ansOverall || "";
+      document.getElementById("prizeSelect").value = state.prize || "";
+      if (parsed.step && parsed.step >= 1 && parsed.step <= 8) {
+        if (parsed.step === 8) renderSummary();
+        goToStep(parsed.step);
+      }
+    } catch (e) {}
+  }
+  updateUI();
+});
+
+function saveProgress() {
+  localStorage.setItem("pdo_hawa_current_state", JSON.stringify({
+    step: currentStep,
+    state: state
+  }));
+}
+
+function goToStep(step) {
+  document.querySelectorAll(".step-view").forEach(el => el.classList.remove("active"));
+  const target = document.getElementById("step-" + step);
+  if (target) target.classList.add("active");
+  currentStep = step;
+  updateUI();
+  saveProgress();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function updateUI() {
+  const meta = stepMeta[currentStep] || stepMeta[1];
+  document.getElementById("boothBadge").textContent = meta.badge;
+  document.getElementById("mainTitle").textContent = currentLang === "ar" ? meta.arTitle : meta.enTitle;
+
+  const pct = currentStep > totalSteps ? 100 : Math.round((currentStep / totalSteps) * 100);
+  document.getElementById("progressBar").style.width = pct + "%";
+
+  const counterEl = document.getElementById("stepCounter");
+  if (currentStep <= totalSteps) {
+    counterEl.textContent = currentLang === "ar"
+      ? `الخطوة ${currentStep} من ${totalSteps}`
+      : `Step ${currentStep} of ${totalSteps}`;
+  } else {
+    counterEl.textContent = currentLang === "ar" ? "اكتملت جميع المراحل (100%)" : "All Steps Completed (100%)";
+  }
+
+  document.querySelectorAll("[data-ar]").forEach(el => {
+    el.textContent = currentLang === "ar" ? el.getAttribute("data-ar") : el.getAttribute("data-en");
+  });
+}
+
+function toggleLanguage() {
+  currentLang = currentLang === "ar" ? "en" : "ar";
+  const root = document.getElementById("htmlRoot");
+  root.setAttribute("lang", currentLang);
+  root.setAttribute("dir", currentLang === "ar" ? "rtl" : "ltr");
+  document.getElementById("mainSubtitle").textContent = currentLang === "ar"
+    ? "أبقِ هذه الصفحة مفتوحة طوال جولتك في الأركان للإجابة على الأسئلة وتوثيق جائزتك."
+    : "Keep this page open throughout your booth tour to answer the quiz and claim your prize.";
+  updateUI();
+}
+
+function nextFromLogin() {
+  const name = document.getElementById("fullName").value.trim();
+  const id = document.getElementById("empId").value.trim();
+  const err = document.getElementById("err-1");
+  if (!name || !id) {
+    err.classList.add("show");
+    return;
+  }
+  err.classList.remove("show");
+  state.fullName = name;
+  state.empId = id;
+  goToStep(2);
+}
+
+function nextFromOpen(stepNum, textareaId) {
+  const val = document.getElementById(textareaId).value.trim();
+  const err = document.getElementById("err-" + stepNum);
+  if (!val) {
+    err.classList.add("show");
+    return;
+  }
+  err.classList.remove("show");
+  if (stepNum === 2) state.ansEmpower = val;
+  if (stepNum === 6) state.ansOverall = val;
+  goToStep(stepNum + 1);
+}
+
+function checkMCQ(stepNum, chosenLetter, btnEl) {
+  const container = document.getElementById("opts-" + stepNum);
+  const fb = document.getElementById("fb-" + stepNum);
+  const nextBtn = document.getElementById("next-" + stepNum);
+  const rule = correctAnswers[stepNum];
+
+  container.querySelectorAll(".option-btn").forEach(b => {
+    b.classList.remove("selected", "correct", "wrong");
+  });
+
+  if (chosenLetter === rule.ans) {
+    btnEl.classList.add("correct");
+    fb.className = "feedback show ok";
+    fb.textContent = currentLang === "ar" ? rule.okAr : rule.okEn;
+    nextBtn.disabled = false;
+    if (stepNum === 3) state.ansInspire = chosenLetter;
+    if (stepNum === 4) state.ansHawa = chosenLetter;
+    if (stepNum === 5) state.ansCare = chosenLetter;
+    saveProgress();
+  } else {
+    btnEl.classList.add("wrong");
+    fb.className = "feedback show err";
+    fb.textContent = currentLang === "ar" ? rule.errAr : rule.errEn;
+    nextBtn.disabled = true;
+  }
+}
+
+async function submitSurvey() {
+  const prize = document.getElementById("prizeSelect").value;
+  const err = document.getElementById("err-7");
+  if (!prize) {
+    err.classList.add("show");
+    return;
+  }
+  err.classList.remove("show");
+
+  const submitBtn = document.getElementById("submitBtn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = currentLang === "ar" ? "جاري الحفظ..." : "Saving...";
+
+  state.prize = prize;
+  state.timestamp = new Date().toLocaleString("en-GB");
+
+  // 1. Save to Local Archive on device
+  const archive = JSON.parse(localStorage.getItem("pdo_hawa_submissions_archive") || "[]");
+  archive.push({ ...state });
+  localStorage.setItem("pdo_hawa_submissions_archive", JSON.stringify(archive));
+
+  // 2. Send to Google Sheets / Cloud Excel if URL is configured
+  if (GOOGLE_SCRIPT_URL) {
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(state)
+      });
+    } catch (e) {
+      console.warn("Cloud sync warning:", e);
+    }
+  }
+
+  renderSummary();
+  goToStep(8);
+}
+
+function renderSummary() {
+  document.getElementById("summaryName").textContent = state.fullName;
+  document.getElementById("summaryId").textContent = state.empId;
+  document.getElementById("summaryPrize").textContent = state.prize;
+  document.getElementById("summaryTime").textContent = state.timestamp;
+}
+
+// Admin Panel Logic (Tap Ribbon 5 times)
+let tapCount = 0;
+let tapTimer = null;
+function handleRibbonTap() {
+  tapCount++;
+  clearTimeout(tapTimer);
+  if (tapCount >= 5) {
+    tapCount = 0;
+    const archive = JSON.parse(localStorage.getItem("pdo_hawa_submissions_archive") || "[]");
+    document.getElementById("localCount").textContent = archive.length;
+    document.getElementById("adminModal").classList.add("open");
+  } else {
+    tapTimer = setTimeout(() => { tapCount = 0; }, 1200);
+  }
+}
+
+function closeAdmin() {
+  document.getElementById("adminModal").classList.remove("open");
+}
+
+function resetCurrentVisitor() {
+  localStorage.removeItem("pdo_hawa_current_state");
+  window.location.reload();
+}
+
+function exportToExcelCSV() {
+  const archive = JSON.parse(localStorage.getItem("pdo_hawa_submissions_archive") || "[]");
+  if (!archive.length) {
+    alert("لا توجد سجلات محفوظة حالياً.");
+    return;
+  }
+  const headers = [
+    "Timestamp",
+    "Full Name",
+    "Employee ID",
+    "Empower Initiative",
+    "Inspire Answer",
+    "HAWA Logo Answer",
+    "Care Clinic Answer",
+    "Overall Experience",
+    "Prize Voucher"
+  ];
+  const rows = archive.map(r => [
+    r.timestamp,
+    r.fullName,
+    r.empId,
+    r.ansEmpower,
+    r.ansInspire,
+    r.ansHawa,
+    r.ansCare,
+    r.ansOverall,
+    r.prize
+  ].map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(","));
+
+  const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `PDO_HAWA_Submissions_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
 </body>
 </html>
