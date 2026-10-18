@@ -211,10 +211,6 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
       <div class="bars" id="prizeBars"><p class="empty-s">No prizes yet.</p></div>
     </div>
     <div class="panel">
-      <h3>Power Up results</h3>
-      <div class="pw" id="powerStats"><p class="empty-s">No results yet.</p></div>
-    </div>
-    <div class="panel">
       <h3>Correct on first try, by station</h3>
       <div id="quizStats"><p class="empty-s">No answers yet.</p></div>
     </div>
@@ -263,14 +259,11 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
     { key: "prizeCategory", label: "Prize Category", type: "mid" },
     { key: "duplicateId", label: "Duplicate?", type: "dup" },
     { key: "first_try_score", label: "1st-try Score", type: "score" },
-    { key: "power_result", label: "Power Up", type: "power" },
-    { key: "connect_score", label: "Connect", type: "score" },
     { key: "inspire_first", label: "Inspire \u2713", type: "yn" },
-    { key: "hawa_first", label: "HAWA \u2713", type: "yn" },
-    { key: "care_score", label: "Clinic", type: "score" },
+    { key: "hawa_first", label: "HAWA Logo \u2713", type: "yn" },
+    { key: "care_first", label: "Care \u2713", type: "yn" },
     { key: "empower_text", label: "Empower: Initiative", type: "long" },
     { key: "experience_text", label: "Overall Experience", type: "long" },
-    { key: "power_answers", label: "Power Up Answers", type: "long" },
     { key: "wrong_tries", label: "Wrong Tries", type: "num" },
     { key: "durationMin", label: "Minutes", type: "num" },
     { key: "startedAt", label: "Started", type: "date" },
@@ -380,7 +373,7 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
     var scored = data.map(function (r) { return scoreNum(r.first_try_score); }).filter(Boolean);
     var avg = scored.length ? scored.reduce(function (a, s) { return a + s[0]; }, 0) / scored.length : null;
     var perfect = scored.filter(function (s) { return s[0] === s[1]; }).length;
-    var max = scored.length ? scored[0][1] : 11;
+    var max = scored.length ? scored[0][1] : 3;
 
     $("kTotal").textContent = total;
     var today = new Date().toDateString();
@@ -413,15 +406,6 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
     unknown.forEach(function (n) { html += '<div class="bar-row"><span class="n">' + esc(n) + '</span><span></span><span class="c">' + given[n] + "</span></div>"; });
     $("prizeBars").innerHTML = html || '<p class="empty-s">No prizes yet.</p>';
 
-    // power up results
-    var pr = {}, colors = { "Courageous Leader": "var(--plum)", "Creative Changemaker": "var(--lilac-deep)", "Community Builder": "var(--mint)" };
-    data.forEach(function (r) { if (r.power_result) pr[r.power_result] = (pr[r.power_result] || 0) + 1; });
-    var pk = Object.keys(colors).concat(Object.keys(pr).filter(function (k) { return !(k in colors); }));
-    $("powerStats").innerHTML = total ? pk.map(function (k) {
-      var n = pr[k] || 0, pct = Math.round(n / total * 100);
-      return '<div class="pw-row"><span class="n">' + esc(k) + '</span><span class="c">' + n + " \u00B7 " + pct + '%</span><span class="t"><span style="width:' + pct + "%;background:" + (colors[k] || "var(--plum)") + '"></span></span></div>';
-    }).join("") : '<p class="empty-s">No results yet.</p>';
-
     // first-try accuracy by station
     function ratio(key) {
       var a = 0, b = 0;
@@ -429,7 +413,7 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
       return b ? [a, b] : null;
     }
     function yes(key) { var y = data.filter(function (r) { return String(r[key]).toLowerCase() === "yes"; }).length; return total ? [y, total] : null; }
-    var qs = [["Connect \u00B7 Origin Awards", ratio("connect_score")], ["Inspire", yes("inspire_first")], ["HAWA Logo", yes("hawa_first")], ["Care Clinic", ratio("care_score")]];
+    var qs = [["Inspire", yes("inspire_first")], ["HAWA Logo", yes("hawa_first")], ["Care", yes("care_first")]];
     $("quizStats").innerHTML = total ? qs.map(function (q) {
       if (!q[1]) return "";
       var pct = Math.round(q[1][0] / q[1][1] * 100);
@@ -559,20 +543,18 @@ thead .sticky-col{z-index:3;background:var(--lilac-soft)}
       ["Salma Al Harthy", "PDO4502"], ["Huda Al Lawati", "PDO2675"], ["Reem Al Siyabi", "PDO3391"], ["Aisha Al Balushi", "PDO1234"]];
     var pr = [["Beauty / Salon", "Asia Spa"], ["Hotel", "Grand Hyatt Muscat"], ["Restaurant / Caf\u00E9", "Laduree"], ["Fitness", "One O One Gym"],
       ["Beauty / Salon", "Lime Spa"], ["Hospital", "Burjeel Hospital Muscat"], ["Flowers / Workshops", "Floward Business"], ["Beauty / Salon", "Asia Spa"]];
-    var pw = ["Courageous Leader", "Community Builder", "Creative Changemaker", "Courageous Leader", "Community Builder", "Courageous Leader", "Creative Changemaker", "Community Builder"];
     var now = Date.now();
     return people.map(function (p, i) {
-      var c = 4 - (i % 3 === 1 ? 1 : 0), ins = i % 4 !== 3, hw = i % 3 !== 2, k = 5 - (i % 2), tot = c + (ins ? 1 : 0) + (hw ? 1 : 0) + k;
+      var ins = i % 4 !== 3, hw = i % 3 !== 2, cr = i % 5 !== 4, tot = (ins ? 1 : 0) + (hw ? 1 : 0) + (cr ? 1 : 0);
       return {
         submittedAt: new Date(now - (people.length - i) * 7 * 60000).toISOString(),
-        startedAt: new Date(now - (people.length - i) * 7 * 60000 - 14 * 60000).toISOString(),
+        startedAt: new Date(now - (people.length - i) * 7 * 60000 - 10 * 60000).toISOString(),
         fullName: p[0], employeeId: p[1], ref: ("D" + (48213 + i * 7919)).slice(0, 6),
         prizeCategory: pr[i][0], prize: pr[i][1], duplicateId: i === 7 ? "YES" : "",
-        first_try_score: tot + "/11", power_result: pw[i], connect_score: c + "/4",
-        inspire_first: ins ? "Yes" : "No", hawa_first: hw ? "Yes" : "No", care_score: k + "/5",
+        first_try_score: tot + "/3", inspire_first: ins ? "Yes" : "No", hawa_first: hw ? "Yes" : "No", care_first: cr ? "Yes" : "No",
         empower_text: ["A mentoring circle pairing new graduates with senior women engineers.", "Flexible hours for mothers returning from maternity leave.", "A women-in-leadership speaker series each quarter."][i % 3],
-        experience_text: ["The Origin Awards stories inspired me most; I'd love a fitness challenge next year.", "Loved the Care clinic checks. More networking sessions please!", "Power Up was the highlight."][i % 3],
-        power_answers: "Career | Courage | My Career | Take charge | Bold", wrong_tries: 11 - tot, durationMin: 12 + i,
+        experience_text: ["The wellness talks inspired me most; I'd love a fitness challenge next year.", "Loved the Care booth. More networking sessions please!", "The Inspire booth was the highlight."][i % 3],
+        wrong_tries: 3 - tot, durationMin: 8 + i,
         submissionId: "demo-" + (1000 + i), device: "Demo", event: "HAWA Omani Women's Day 2026"
       };
     });
