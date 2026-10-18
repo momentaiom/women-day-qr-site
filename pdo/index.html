@@ -227,76 +227,39 @@ input:focus,textarea:focus,select:focus{outline:none; border-color:var(--plum); 
      CONTENT — edit questions, answers and prizes here
      ================================================================== */
   var STAGES = [
-    { id: "connect", name: "Connect", icon: "C",
-      gate: { word: "Connect", tagline: "People · Ideas · Impact", eyebrow: "Game 1 · The Origin Awards", title: "Connect the Women Achievement",
-        text: "Go to the Origin Awards wall and connect each woman to the milestone she achieved.",
-        steps: ["Read the five award stories", "Match each woman to her achievement", "Come back and answer 4 quick questions"],
-        btn: "Yes, I've played it" },
-      questions: [
-        { id: "c1", type: "mcq", q: "Who became the first Omani coach to earn the A License in Football Coaching?",
-          options: ["Ahlam Al Marjeby", "Wafa Al Sumri", "Zeyana Al Kindi", "Samah Al Rawahi"], correct: 0 },
-        { id: "c2", type: "mcq", q: "Wafa Al Sumri earned international recognition as a…",
-          options: ["Football coach", "Basketball referee", "Operations team leader", "Public service leader"], correct: 1 },
-        { id: "c3", type: "mcq", q: "Who is PDO's first female Operations Delivery Team Leader?",
-          options: ["Hanan Al Rumhi", "Samah Al Rawahi", "Zeyana Al Kindi", "Ahlam Al Marjeby"], correct: 2 },
-        { id: "c4", type: "mcq", q: "Which award did Samah Al Rawahi receive?",
-          options: ["Public Service Leader of the Year, Community Support", "International Basketball Referee", "First Omani Football Coach A License", "Young Global Omani Professional of the Year"], correct: 3 }
-      ] },
-
-    { id: "power", name: "Power Up", icon: "✿",
-      gate: { word: "Power Up", tagline: "Own your power", eyebrow: "Game 2", title: "Power Up Your HAWA",
-        text: "Answer five quick questions. Every answer lights up a petal of your HAWA flower and reveals your power.",
-        steps: ["Tap the answer that feels most like you", "Watch your flower bloom", "Discover your power"],
-        btn: "Yes, let's power up" },
-      power: [
-        { q: "What gives you strength?", options: [["Family", "B"], ["Career", "L"], ["Health", "C"], ["Friends", "B"]] },
-        { q: "What is your superpower?", options: [["Leadership", "L"], ["Creativity", "C"], ["Kindness", "B"], ["Courage", "L"]] },
-        { q: "What are you building?", options: [["My Career", "L"], ["My Family", "B"], ["Myself", "C"], ["My Community", "B"]] },
-        { q: "When a challenge comes, you…", options: [["Take charge", "L"], ["Try a new idea", "C"], ["Rally people", "B"], ["Keep going", "L"]] },
-        { q: "The woman you're becoming is…", options: [["Bold", "L"], ["Inventive", "C"], ["Generous", "B"], ["Inspiring", "C"]] }
-      ] },
-
     { id: "empower", name: "Empower", icon: "E",
       gate: { word: "Empower", eyebrow: "Booth", title: "Share your idea for women at PDO", text: "Visit the Empower booth, then answer one question.", btn: "Yes, I visited it" },
       questions: [
-        { id: "empower", type: "text", min: 10, q: "If you could introduce one new initiative to further empower women at PDO, what would it be?" }
+        { id: "empower", type: "text", min: 10, q: "If you could introduce one new initiative to further empower women at PDO what would it be?" }
       ] },
 
     { id: "inspire", name: "Inspire", icon: "I",
-      gate: { word: "Inspire", eyebrow: "Booth · AEICD", title: "Early intervention for children", text: "Visit the Inspire booth and learn about AEICD's work with children.", btn: "Yes, I visited it" },
+      gate: { word: "Inspire", eyebrow: "Booth", title: "Early intervention for children", text: "Visit the Inspire booth, then answer one question.", btn: "Yes, I visited it" },
       questions: [
         { id: "inspire", type: "mcq", q: "Why is early intervention important for children with disabilities?",
-          options: ["It supports children's development, builds essential skills, and helps them reach their full potential",
-                    "It is only needed when children start school",
-                    "It focuses only on a child's difficulties rather than their abilities"], correct: 0,
-          note: "This highlights AEICD's mission: early intervention helps children develop, learn, and thrive." }
+          options: ["It supports children's development, builds essential skills, and helps them reach their full potential.",
+                    "It is only needed when children start school.",
+                    "It focuses only on a child's difficulties rather than their abilities."], correct: 0,
+          note: "This question highlights AEICD\u2019s mission and the importance of early intervention in helping children develop, learn, and thrive." }
       ] },
 
-    { id: "hawa", name: "HAWA", icon: "H",
-      gate: { word: "HAWA", eyebrow: "Booth", title: "The HAWA logo", text: "Visit the HAWA logo booth, then answer one question.", btn: "Yes, I visited it" },
+    { id: "hawa", name: "HAWA Logo", icon: "H",
+      gate: { word: "HAWA", eyebrow: "Booth", title: "The HAWA logo", text: "Visit the HAWA Logo booth, then answer one question.", btn: "Yes, I visited it" },
       questions: [
         { id: "hawa", type: "mcq", q: "What does HAWA help women at PDO do?",
-          options: ["Connect and support one another", "Build confidence and leadership skills", "Access development and wellbeing opportunities", "All of the above"], correct: 3 }
+          options: ["Connect and support one another", "Build confidence and leadership skills", "Access development and wellbeing opportunities", "All of the below"], correct: 3 }
       ] },
 
-    { id: "care", name: "Clinic", icon: "+",
-      gate: { word: "Care", over: "Her Health & Wellbeing Hub", tagline: "Care · Support · Thrive", eyebrow: "Clinic", title: "Your health check", text: "Visit the Care clinic for your health check, then answer 5 quick health questions.", btn: "Yes, I visited the clinic" },
+    { id: "care", name: "Care", icon: "+",
+      gate: { word: "Care", over: "Her Health & Wellbeing Hub", tagline: "Care \u00B7 Support \u00B7 Thrive", eyebrow: "Booth", title: "Your health check", text: "Visit the Care booth, then answer one question.", btn: "Yes, I visited it" },
       questions: [
-        { id: "k1", type: "mcq", q: "Which health condition is often called the “silent killer” because it may have no noticeable symptoms?",
-          options: ["High blood pressure", "Seasonal allergies", "Common cold", "Acid reflux"], correct: 0 },
-        { id: "k2", type: "mcq", q: "What is considered a normal blood pressure reading for adults?",
-          options: ["160/100 mmHg", "Below 120/80 mmHg", "145/95 mmHg", "180/110 mmHg"], correct: 1 },
-        { id: "k3", type: "mcq", q: "How much moderate physical activity is recommended for adults each week?",
-          options: ["30 minutes", "60 minutes", "At least 150 minutes", "None if you eat well"], correct: 2 },
-        { id: "k4", type: "mcq", q: "Which can be an early warning sign of diabetes?",
-          options: ["A runny nose", "Excessive thirst and frequent urination", "Itchy eyes", "Hiccups"], correct: 1 },
-        { id: "k5", type: "mcq", q: "How many hours of sleep do most adults need each night?",
-          options: ["4–5 hours", "5–6 hours", "7–9 hours", "10–12 hours"], correct: 2 }
+        { id: "care", type: "mcq", q: "Which health condition is often called the \u201Csilent killer\u201D because it may have no noticeable symptoms?",
+          options: ["High blood pressure", "Seasonal allergies", "Common cold", "Acid reflux"], correct: 0 }
       ] },
 
-    { id: "experience", name: "Feedback", icon: "★", noGate: true,
+    { id: "experience", name: "Experience", icon: "\u2605", noGate: true,
       questions: [
-        { id: "experience", type: "text", min: 10, q: "What inspired you most about HAWA this year, which activity did you enjoy most, and what would you love to see from HAWA next year?" }
+        { id: "experience", type: "text", min: 10, q: "What inspired you most about Hawa this year, which activity did you enjoy most, and what would you love to see from Hawa next year?" }
       ] }
   ];
 
@@ -318,7 +281,7 @@ input:focus,textarea:focus,select:focus{outline:none; border-color:var(--plum); 
 
   /* ================================================================== */
   var CFG = window.PASSPORT_CONFIG || {};
-  var STORE_KEY = "hawa-passport-v2", OUTBOX_KEY = "hawa-passport-outbox-v2";
+  var STORE_KEY = "hawa-passport-v3", OUTBOX_KEY = "hawa-passport-outbox-v3";
   var LETTERS = "ABCDEFGH";
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -340,6 +303,7 @@ input:focus,textarea:focus,select:focus{outline:none; border-color:var(--plum); 
   function load() { try { var s = JSON.parse(localStorage.getItem(STORE_KEY)); if (s && s.submissionId) state = Object.assign(state, s); } catch (e) {} }
 
   /* ---------------- stamps ---------------- */
+  $("stamps").style.gridTemplateColumns = "repeat(" + STAGES.length + ",1fr)";
   STAGES.forEach(function (st, i) {
     var li = document.createElement("li"); li.className = "stamp"; li.id = "st-" + i;
     li.innerHTML = '<span class="dot" aria-hidden="true">' + esc(st.icon) + '</span><span class="name">' + esc(st.name) + "</span>";
@@ -362,7 +326,7 @@ input:focus,textarea:focus,select:focus{outline:none; border-color:var(--plum); 
     var html = "", cls = "screen" + (backwards ? " back" : "");
     if (s.kind === "welcome") {
       html = '<section class="' + cls + '">' +
-        '<div class="hero"><p class="ar-title" lang="ar">يوم المرأة<br>العُمانية</p><span class="sub">HAWA Passport</span><span class="tag">Connect · Empower · Inspire</span></div>' +
+        '<div class="hero"><p class="ar-title" lang="ar">يوم المرأة<br>العُمانية</p><span class="sub">HAWA Passport</span><span class="tag">Empower · Inspire · Care</span></div>' +
         '<p class="lead">Keep this page open on your phone. Play each game, visit every booth, answer the questions, then claim your prize at the wheel.</p>' +
         '<div class="field"><label for="fullName">Full Name</label><input id="fullName" type="text" autocomplete="name" autocapitalize="words" maxlength="80" placeholder="e.g. Aisha Al Balushi" value="' + esc(state.fullName) + '"><p class="err" id="fullNameErr"></p></div>' +
         '<div class="field"><label for="employeeId">Employee ID</label><input id="employeeId" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="20" placeholder="e.g. 123456" value="' + esc(state.employeeId) + '"><p class="err" id="employeeIdErr"></p></div>' +
@@ -406,7 +370,7 @@ input:focus,textarea:focus,select:focus{outline:none; border-color:var(--plum); 
         "<li><span>Name</span><span>" + esc(state.fullName) + "</span></li>" +
         "<li><span>Employee ID</span><span>" + esc(state.employeeId) + "</span></li>" +
         "<li><span>Stations completed</span><span>" + STAGES.length + " / " + STAGES.length + "</span></li>" +
-        "<li><span>Your power</span><span>" + esc(powerTitle()) + "</span></li>" +
+        (POWER_STAGE ? "<li><span>Your power</span><span>" + esc(powerTitle()) + "</span></li>" : "") +
         "<li><span>Correct on first try</span><span>" + ft[0] + " / " + ft[1] + "</span></li>" +
         '</ul><p class="err" id="submitErr" role="alert"></p></section>';
     } else if (s.kind === "done") {
@@ -437,7 +401,7 @@ input:focus,textarea:focus,select:focus{outline:none; border-color:var(--plum); 
       "</defs>" + petals + '<circle class="core" cx="100" cy="100" r="17"/></svg>';
   }
   function powerResult() {
-    if (state.power.length < POWER_STAGE.power.length) return "";
+    if (!POWER_STAGE || state.power.length < POWER_STAGE.power.length) return "";
     var count = { L: 0, C: 0, B: 0 };
     state.power.forEach(function (k, i) { count[POWER_STAGE.power[i].options[k][1]]++; });
     var best = Object.keys(count).sort(function (a, b) { return count[b] - count[a]; });
@@ -532,7 +496,7 @@ input:focus,textarea:focus,select:focus{outline:none; border-color:var(--plum); 
         break;
       case "text": b.textContent = "Next"; break;
       case "power":
-        b.textContent = "Next station"; b.hidden = state.power.length < POWER_STAGE.power.length; break;
+        b.textContent = "Next station"; b.hidden = !POWER_STAGE || state.power.length < POWER_STAGE.power.length; break;
       case "prize": b.textContent = "Submit"; break;
     }
   }
@@ -599,17 +563,13 @@ input:focus,textarea:focus,select:focus{outline:none; border-color:var(--plum); 
   function yn(qid) { var m = state.mcq[qid]; return m && m.ok && !m.wrong.length ? "Yes" : "No"; }
 
   function buildPayload() {
-    var c = firstTry("connect"), k = firstTry("care"), t = firstTry();
+    var t = firstTry();
     return {
       submissionId: state.submissionId, event: CFG.EVENT || "", startedAt: state.startedAt,
       durationMin: Math.max(1, Math.round((Date.now() - new Date(state.startedAt).getTime()) / 60000)),
       fullName: state.fullName, employeeId: state.employeeId,
-      connect_score: c[0] + "/" + c[1],
-      power_result: powerTitle(),
-      power_answers: state.power.map(function (k, i) { return POWER_STAGE.power[i].options[k][0]; }).join(" | "),
       empower_text: (state.text.empower || "").trim(),
-      inspire_first: yn("inspire"), hawa_first: yn("hawa"),
-      care_score: k[0] + "/" + k[1],
+      inspire_first: yn("inspire"), hawa_first: yn("hawa"), care_first: yn("care"),
       experience_text: (state.text.experience || "").trim(),
       first_try_score: t[0] + "/" + t[1], wrong_tries: wrongTries(),
       prizeCategory: state.prizeCategory, prize: state.prize,
